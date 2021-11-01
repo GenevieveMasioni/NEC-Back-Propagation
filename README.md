@@ -8,6 +8,16 @@ Prediction using the following algorithms:
 • Back-Propagation (BP), implemented by the student 
 • Multiple Linear Regression (MLR), using free software 
 
+## Tasks list
+Functions :
+- [ ] Data preprocessing (third dataset)
+- [ ] Data normalization (all datasets)
+- [ ] Cross-validation (MLR and BP)
+- [ ] BP
+- [ ] MLR (use of an existing Julia lib)
+- [ ] Compute performance (automatisation of test process to find the best parameters for relative absolute error minimization)
+- [ ] Data slicer (training-validation and test)
+
 ## Datasets 
  
 The predictions must be performed on three datasets: 
