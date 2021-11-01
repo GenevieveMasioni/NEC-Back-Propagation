@@ -76,4 +76,4 @@ y_out = zeros(nn.n[nn.L])
 
 feed_forward!(nn, x_in, y_out)
 
-y_out
+y_out 
