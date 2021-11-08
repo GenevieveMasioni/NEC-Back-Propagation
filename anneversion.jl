@@ -77,7 +77,7 @@ function feed_forward!(nn::NeuralNet, x_in::Vector{Float64}, y_out::Vector{Float
 end
 
 #BACK PROPAGATE ERROR
-function BPError(nn::NeuralNet, y_out::Vector{Float64}, dfTemp, count::Int64)
+function BPError(nn::NeuralNet, y_out::Vector{Float64}, dfTemp, count::Int64) #this section need to be looked at (see how to make use of the dataframes)
 
     for ℓ in 2:nn.L
         
@@ -102,7 +102,7 @@ function UpdateThresholdWeights(nn::NeuralNet,count::Int64)
 end
 #BACK PROPAGATE ALGORITHM
 
-function BP(nn::NeuralNet, dfTemp)
+function BP(nn::NeuralNet, dfTemp) #this section need to be looked at (see how to make use of the dataframes)
   for ℓ in 2:nn.L
     for i in 1:nn.n[ℓ]
       #choose rnd pattern of the training set
