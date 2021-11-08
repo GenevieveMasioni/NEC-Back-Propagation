@@ -5,6 +5,15 @@ using DataFrames
 #df = DataFrame(CSV.File("A1-synthetic.txt"))
 #print(df)
 
+#DATASET STRUCTURE
+struct Dataset
+  features::Int64                # number of features
+  patterns::Int64                # number of patterns
+  boundary::Float64              # percentage of patterns used for training-validation set [0,1]
+  train::DataFrame            # training-validation set
+  test::DataFrame                # test set
+end
+
 #NEURONAL NETWORK ARCHITECTURE
 struct NeuralNet
     L::Int64                        # number of layers
@@ -77,7 +86,7 @@ function feed_forward!(nn::NeuralNet, x_in::Vector{Float64}, y_out::Vector{Float
 end
 
 #BACK PROPAGATE ERROR
-function BPError(nn::NeuralNet, y_out::Vector{Float64}, dfTemp, count::Int64) #this section need to be looked at (see how to make use of the dataframes)
+function BPError(nn::NeuralNet, y_out::Vector{Float64}, data::Dataset, count::Int64) #this section need to be looked at (see how to make use of the dataframes)
 
     for ℓ in 2:nn.L
         
@@ -102,14 +111,15 @@ function UpdateThresholdWeights(nn::NeuralNet,i::Int64, j::Int64)
 end
 #BACK PROPAGATE ALGORITHM
 
-function BP(nn::NeuralNet, dfTemp) #this section need to be looked at (see how to make use of the dataframes)
+function BP(nn::NeuralNet, data::Dataset) #this section need to be looked at (see how to make use of the dataframes)
+ 
+ 
   for ℓ in 2:nn.L
-    for i in 1:nn.n[ℓ]
-      #choose rnd pattern of the training set
+    for j in 1:nn.n[ℓ]
 
-      feed_forward()
-      BPError()
-      UpdateThresholdWeights()
+      feed_forward(nn, data.train, data.patterns) #check this later
+      BPError(nn, data.train, data.patterns)
+      UpdateThresholdWeights(nn, ℓ, j)
 
     end
       
