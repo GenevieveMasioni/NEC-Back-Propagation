@@ -1,10 +1,11 @@
 include("utils.jl")
+include("NeuralNet.jl")
 
 struct Dataset
   features::Int64                # number of features
   patterns::Int64                # number of patterns
   boundary::Float64              # percentage of patterns used for training-validation set [0,1]
-  training::DataFrame            # training-validation set
+  train::DataFrame            # training-validation set
   test::DataFrame                # test set
 end
 
@@ -14,12 +15,19 @@ function DataSlicer(path::String, boundary::Float64 = 0.8)
   df = DataFrame(CSV.File(path))
   rows = size(df, 1)
   cols = size(df, 2)
-  maxTraining = round(Int64, rows * boundary)
-  trainingSet = first(df, maxTraining)
-  testSet = last(df, rows - maxTraining)
-  println("Features : ", df.features, " | Patterns : ", df.patterns, " | Boundary : ", df.boundary, " | Training : ", size(df.training, 1), " | Test : ", size(df.test, 1))
-  return Dataset(cols, rows, boundary, trainingSet, testSet)
+  train, test = TrainTestSplit(df, boundary)
+  println("Features : ", cols, " | Patterns : ", rows, " | Boundary : ", boundary, " | Training : ", size(train, 1), " | Test : ", size(test, 1))
+  return Dataset(cols, rows, boundary, train, test)
 end
 
 
-df = DataSlicer("dataset/A1-turbine.txt", 0.85)
+function Multilinear_regression(data::Dataset)
+  # train a linear regression model with GLM (Generalized Linear Model) package
+  fm = @formula(fall ~ power_of_hydroelectrical_turbine)
+  linearRegressor = lm(fm, data.train)
+  # Model Prediction and Performance : Mean Absolute Percentage Error
+  println(linearRegressor) 
+end
+
+data = DataSlicer("dataset/A1-turbine.txt", 0.85)
+Multilinear_regression(data)
