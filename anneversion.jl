@@ -93,12 +93,12 @@ function BPError(nn::NeuralNet, y_out::Vector{Float64}, dfTemp, count::Int64) #t
 end
 
 #UPDATE THRESHOLDS AND WEIGHTS
-function UpdateThresholdWeights(nn::NeuralNet,count::Int64)
-    nn.d_w[count].=-nn.delta[count]*nn.ξ[count-1]+nn.d_w[count-1]
-    nn.d_θ[count].=nn.delta[count] + nn.d_θ[count-1]
+function UpdateThresholdWeights(nn::NeuralNet,i::Int64, j::Int64)
+    nn.d_w[i][j].=-nn.delta[i]*nn.ξ[i-1][j]+nn.d_w[i-1][j]
+    nn.d_θ[i].=nn.delta[i] + nn.d_θ[i]
 
-    nn.w[count] = nn.w[count-1]+nn.d_w[count]
-    nn.θ[count] = nn.θ[count-1]+nn.d_θ[count] 
+    nn.w[i][j] = nn.w[i-1]+nn.d_w[i]
+    nn.θ[i] = nn.θ[i-1]+nn.d_θ[i] 
 end
 #BACK PROPAGATE ALGORITHM
 
@@ -107,7 +107,6 @@ function BP(nn::NeuralNet, dfTemp) #this section need to be looked at (see how t
     for i in 1:nn.n[ℓ]
       #choose rnd pattern of the training set
 
-      #feed_forward
       feed_forward()
       BPError()
       UpdateThresholdWeights()
