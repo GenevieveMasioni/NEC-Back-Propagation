@@ -20,4 +20,14 @@ function DataSlicer(path::String, boundary::Float64 = 0.8)
   return Dataset(cols, rows, boundary, train, test)
 end
 
-df = DataSlicer("dataset/A1-turbine.txt", 0.85)
+
+function Multilinear_regression(data::Dataset)
+  # train a linear regression model with GLM (Generalized Linear Model) package
+  fm = @formula(fall ~ power_of_hydroelectrical_turbine)
+  linearRegressor = lm(fm, data.train)
+  # Model Prediction and Performance : Mean Absolute Percentage Error
+  println(linearRegressor) 
+end
+
+data = DataSlicer("dataset/A1-turbine.txt", 0.85)
+Multilinear_regression(data)
