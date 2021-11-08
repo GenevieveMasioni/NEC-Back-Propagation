@@ -7,6 +7,7 @@ Pkg.add("CSV")
 Pkg.add("DataFrames")
 Pkg.add("GLM")
 Pkg.add("Plots")
+Pkg.add("Lathe")
 =#
 
 # Load the installed packages
@@ -14,3 +15,4 @@ using CSV
 using DataFrames
 using GLM
 using Plots
+using Lathe.preprocess: TrainTestSplit
