@@ -15,6 +15,7 @@ struct NeuralNet
     θ::Vector{Vector{Float64}}      # thresholds
     delta::Vector{Vector{Float64}}  # propagation errors
     d_w::Vector{Array{Float64,2}}   # changes of weights
+    d_θ::Vector{Array{Float64,2}}   # changes of thresholds
     
 end
 
@@ -31,11 +32,15 @@ function NeuralNet(layers::Vector{Int64})
       push!(h, zeros(layers[ℓ]))
       push!(ξ, zeros(layers[ℓ]))
       push!(θ, rand(layers[ℓ]))                     # random, but should have also negative values
-      push!(delta, zeros(layers[ℓ]))                   
+      push!(delta, zeros(layers[ℓ]))
+      push!(d_w, zeros(layers[ℓ]))
+      push!(d_θ, zeros(layers[ℓ]))                   
     end
   
     w = Array{Float64,2}[]
-    push!(w, zeros(1, 1))                          # unused, but needed to ensure w[2] refers to weights between the first two layers
+    d_w = Array{Float64,2}[]
+    push!(w, zeros(1, 1))                           # unused, but needed to ensure w[2] refers to weights between the first two layers
+                              
     for ℓ in 2:L
       push!(w, rand(layers[ℓ], layers[ℓ - 1]))     # random, but should have also negative values
     end
@@ -89,11 +94,26 @@ end
 
 #UPDATE THRESHOLDS AND WEIGHTS
 function UpdateThresholdWeights(nn::NeuralNet,count::Int64)
-    
+    nn.d_w[count].=-nn.delta[count]*nn.ξ[count-1]+nn.d_w[count-1]
+    nn.d_θ[count].=nn.delta[count] + nn.d_θ[count-1]
+
+    nn.w[count] = nn.w[count-1]+nn.d_w[count]
+    nn.θ[count] = nn.θ[count-1]+nn.d_θ[count] 
 end
-#=BACK PROPAGATE ALGORITHM
+#BACK PROPAGATE ALGORITHM
 
-function BP()
+function BP(nn::NeuralNet, dfTemp)
+  for ℓ in 2:nn.L
+    for i in 1:nn.n[ℓ]
+      #choose rnd pattern of the training set
 
-end=#
+      #feed_forward
+      feed_forward()
+      BPError()
+      UpdateThresholdWeights()
+
+    end
+      
+  end
+end
 
