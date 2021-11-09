@@ -22,11 +22,27 @@ end
 
 
 function Multilinear_regression(data::Dataset)
-  # train a linear regression model with GLM (Generalized Linear Model) package
+  #= train a linear regression model with GLM (Generalized Linear Model) package
   fm = @formula(fall ~ power_of_hydroelectrical_turbine)
   linearRegressor = lm(fm, data.train)
   # Model Prediction and Performance : Mean Absolute Percentage Error
-  println(linearRegressor) 
+  =#
+
+  println("solve using llsq")
+  X = Matrix(data.train)
+  y = data.test
+  a, b = llsq(X, y)
+  println(a)
+  println(b)
+
+  println("do prediction")
+  yp = X * a + b
+  println(yp)
+
+  println("measure the error")
+  rmse = sqrt(mean(abs2(y - yp)))
+  print("rmse = $rmse")
+
 end
 
 data = DataSlicer("dataset/A1-turbine.txt", 0.85)
