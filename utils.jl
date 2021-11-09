@@ -18,3 +18,11 @@ using GLM
 using Plots
 using Lathe.preprocess: TrainTestSplit
 using MultivariateStats
+
+struct Dataset
+    features::Int64                # number of features
+    patterns::Int64                # number of patterns
+    boundary::Float64              # percentage of patterns used for training-validation set [0,1]
+    train::Array{Float64,2}            # training-validation set
+    test::Array{Float64,2}                # test set
+end
