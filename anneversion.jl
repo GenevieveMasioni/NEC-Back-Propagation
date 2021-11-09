@@ -7,62 +7,48 @@ include("genevieve.jl")
 #df = DataFrame(CSV.File("A1-synthetic.txt"))
 #print(df)
 
-#NEURONAL NETWORK ARCHITECTURE
-#=struct NeuralNet
-    L::Int64                        # number of layers
-    n::Vector{Int64}                # sizes of layers
-    h::Vector{Vector{Float64}}      # units field
-    ξ::Vector{Vector{Float64}}      # units activation
-    w::Vector{Array{Float64,2}}     # weights
-    θ::Vector{Vector{Float64}}      # thresholds
-    delta::Vector{Vector{Float64}}  # propagation errors
-    d_w::Vector{Array{Float64,2}}   # changes of weights
-    d_θ::Vector{Array{Float64,2}}   # changes of thresholds
-    
-end=#
-
-
 function NeuralNet(layers::Vector{Int64})
-    L = length(layers)
-    n = copy(layers)
-  
-    h = Vector{Float64}[]
-    ξ = Vector{Float64}[]
-    θ = Vector{Float64}[]
-    delta = Vector{Float64}[]
-    d_θ = Array{Float64}[]
-    for ℓ in 1:L
-      push!(h, zeros(layers[ℓ]))
-      push!(ξ, zeros(layers[ℓ]))
-      push!(θ, rand(layers[ℓ]))                     # random, but should have also negative values
-      push!(delta, zeros(layers[ℓ]))
-      push!(d_θ, zeros(layers[ℓ]))                   
-    end
-  
-    w = Array{Float64,2}[]
-    d_w = Array{Float64,2}[]
+  L = length(layers)
+  n = copy(layers)
 
-    push!(d_w, zeros(1,1))
-    push!(w, zeros(1, 1))                           # unused, but needed to ensure w[2] refers to weights between the first two layers
-                              
-    for ℓ in 2:L
-      push!(w, rand(layers[ℓ], layers[ℓ - 1]))     # random, but should have also negative values
-      push!(d_w, zeros(layers[ℓ],layers[ℓ - 1]))
-    end
-  
-    return NeuralNet(L, n, h, ξ, w, θ, d_w, d_θ)
+  h = Vector{Float64}[]
+  ξ = Vector{Float64}[]
+  θ = Vector{Float64}[]
+  delta = Vector{Float64}[]
+  for ℓ in 1:L
+    push!(h, zeros(layers[ℓ]))
+    push!(ξ, zeros(layers[ℓ]))
+    push!(θ, rand(layers[ℓ]))                     # random, but should have also negative values
+    push!(delta, zeros(layers[ℓ]))
+  end
+
+  w = Array{Float64,2}[]
+  d_w = Array{Float64,2}[]
+  d_θ = Array{Float64,2}[]
+
+  push!(w, zeros(1, 1))                           # unused, but needed to ensure w[2] refers to weights between the first two layers
+  push!(d_w, zeros(1,1))
+  push!(d_θ, zeros(1,1))
+
+  for ℓ in 2:L
+    push!(w, rand(layers[ℓ], layers[ℓ - 1]))     # random, but should have also negative values
+    push!(d_w, zeros(layers[ℓ],layers[ℓ - 1]))
+    push!(d_θ, zeros(layers[ℓ],layers[ℓ - 1]))
+  end
+
+  return NeuralNet(L, n, h, ξ, w, θ, delta, d_w, d_θ)
 end
 
-#FEED FOWARD PROPAGATION
+# FEED FOWARD PROPAGATION
 function sigmoid(h::Float64)::Float64
     return 1 / (1 + exp(-h))
   end
-  
-  
+
+
 function feed_forward!(nn::NeuralNet, x_in::Vector{Float64}, y_out::Vector{Float64})
     # copy input to first layer, Eq. (6)
     nn.ξ[1] .= x_in
-  
+
     # feed-forward of input pattern
     for ℓ in 2:nn.L
       for i in 1:nn.n[ℓ]
@@ -76,50 +62,50 @@ function feed_forward!(nn::NeuralNet, x_in::Vector{Float64}, y_out::Vector{Float
         nn.ξ[ℓ][i] = sigmoid(h)
       end
     end
-  
+
     # copy activation in output layer as output, Eq. (9)
     y_out .= nn.ξ[nn.L]
 end
 
 #BACK PROPAGATE ERROR
-function BPError(nn::NeuralNet, y_out::Vector{Float64}, data::Vector{Float64}) 
+function BPError(nn::NeuralNet, y_out::Vector{Float64}, data::Vector{Float64})
   current_error = 0
 
-  for i in 1:nn.n[nn.L] 
+  for i in 1:nn.n[nn.L]
     nn.delta[nn.L][i] = sigmoid(nn.h[nn.L][i])*(y_out[i]- data[i])
   end
-  for ℓ in 2:nn.L   
+  for ℓ in 2:nn.L
     for j in 1:nn.n[ℓ-1]
       for i in 1:nn.n[ℓ]
         current_error += nn.delta[ℓ][i]*nn.w[ℓ][i,j]
       end
       nn.delta[ℓ-1][j] = sigmoid(nn.h[ℓ-1][j]) * current_error
-    end    
+    end
   end
 
 end
 
 #UPDATE THRESHOLDS AND WEIGHTS
 function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64)
-    
-  for ℓ in 2:nn.L   
+
+  for ℓ in 2:nn.L
     for i in 1:nn.n[ℓ]
       for j in 1:nn.n[ℓ-1]
-        nn.d_w[ℓ][i,j] = -η*nn.delta[ℓ][i]*nn.ξ[ℓ-1][j] + α*nn.d_w[ℓ][i,j] 
-        nn.w[ℓ][i,j] = nn.w[ℓ][i,j]+nn.d_w[ℓ][i,j] 
+        nn.d_w[ℓ][i,j] = -η*nn.delta[ℓ][i]*nn.ξ[ℓ-1][j] + α*nn.d_w[ℓ][i,j]
+        nn.w[ℓ][i,j] = nn.w[ℓ][i,j]+nn.d_w[ℓ][i,j]
       end
       nn.d_θ[ℓ][i].=η*nn.delta[ℓ][i] + α*nn.d_θ[ℓ][i]
       nn.θ[ℓ][i] = nn.θ[i]+nn.d_θ[ℓ][i]
-    end    
+    end
   end
-   
+
 end
 #BACK PROPAGATE ALGORITHM
 
 function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) #this section need to be looked at (see how to make use of the dataframes)
   epoch = 10
   y_out = zeros(nn.n[nn.L])
- 
+
   for ℓ in 1:epoch
     for j in 1:size(data.train, 1)
       #random pattern
@@ -128,16 +114,15 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) #this sectio
       UpdateThresholdWeights(nn,η, α)
 
     end
-      
+
   end
 end
 
 layers = [4; 9; 5; 1]
 nn = NeuralNet(layers)
-#data = DataSlicer("dataset/A1-turbine.txt", 0.85) 
+#data = DataSlicer("dataset/A1-turbine.txt", 0.85)
 
 η = 0.01
 α = 0.1
 
 #BP(nn, data, η, α)
-

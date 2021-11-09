@@ -1,4 +1,4 @@
-include("NeuralNet.jl")
+include("utils.jl")
 
 # slicer : [0,1] with 1 = 100%, default 80 %
 function DataSlicer(path::String, boundary::Float64 = 0.8)
