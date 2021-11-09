@@ -30,13 +30,13 @@ The predictions must be performed on three datasets:
 3. Dataset from the Internet:
 - 6 features, one of them used for prediction (not a categorical value)
 - At least 400 patterns
-- 80%  of  the  patterns  for  training  and  validation,  20% for test. Shuffled data to destroy any kind of sorting.
+- 80% of the patterns for training and validation, 20% for test. Shuffled data to destroy any kind of sorting.
 
 ## Procedure
 
-- Data preprocessing of the thirs dataset.
+- Data preprocessing of the third dataset.
 - Apply cross-validation (n-fold cross-validation, leave-1-out, bootstrapping, etc.) for both  MLR  and  BP, report  the  expected  prediction  error obtained from cross-validation, and compare it with the prediction error on the test set.
-- Find good values for all the parameters of BP: architecture of the network, learning  rate  and  momentum,  activation  function,  and  number  of  epochs.
+- Find good values for all the parameters of BP: architecture of the network, learning  rate  and  momentum,  activation function,  and  number  of  epochs.
 - Automate the whole process.
 
 ## Implementation of BP
@@ -64,8 +64,6 @@ All the training parameters must be put in a text file. It must include:
 - Number of units in each layer
 - Number of epochs
 - Learning rate and momentum
-- Optionally: information about the scaling method (normalization or
-standardization) of inputs and/or outputs, and in the case of normalization, the
-range of the normalized data
+- Optionally: information about the scaling method (normalization or standardization) of inputs and/or outputs, and in the case of normalization, the range of the normalized data
 - Optionally: the selected activation function (sigmoid, tanh, ReLU, etc.)
 - Optionally: name of output file(s)
