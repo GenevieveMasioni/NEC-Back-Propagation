@@ -1,4 +1,3 @@
-include("utils.jl")
 include("NeuralNet.jl")
 
 # slicer : [0,1] with 1 = 100%, default 80 %
@@ -9,7 +8,7 @@ function DataSlicer(path::String, boundary::Float64 = 0.8)
   cols = size(df, 2)
   train, test = TrainTestSplit(df, boundary)
   println("Features : ", cols, " | Patterns : ", rows, " | Boundary : ", boundary, " | Training : ", size(train, 1), " | Test : ", size(test, 1))
-  
+
   return Dataset(cols, rows, boundary, Matrix(train), Matrix(test))
 end
 

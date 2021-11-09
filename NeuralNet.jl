@@ -1,14 +1,4 @@
-struct NeuralNet
-  L::Int64                        # number of layers
-  n::Vector{Int64}                # sizes of layers
-  h::Vector{Vector{Float64}}      # units field
-  ξ::Vector{Vector{Float64}}      # units activation
-  w::Vector{Array{Float64,2}}     # weights
-  θ::Vector{Vector{Float64}}      # thresholds
-  delta::Vector{Vector{Float64}}  # propagation errors
-  d_w::Vector{Array{Float64,2}}   # changes of weights
-  d_θ::Vector{Array{Float64,2}}   # changes of thresholds
-end
+include("utils.jl")
 
 function NeuralNet(layers::Vector{Int64})
   L = length(layers)
@@ -24,7 +14,7 @@ function NeuralNet(layers::Vector{Int64})
     push!(ξ, zeros(layers[ℓ]))
     push!(θ, rand(layers[ℓ]))                     # random, but should have also negative values
     push!(delta, zeros(layers[ℓ]))
-    push!(d_θ, zeros(layers[ℓ]))                   
+    push!(d_θ, zeros(layers[ℓ]))
   end
 
   w = Array{Float64,2}[]
@@ -32,7 +22,7 @@ function NeuralNet(layers::Vector{Int64})
 
   push!(d_w, zeros(1,1))
   push!(w, zeros(1, 1))                           # unused, but needed to ensure w[2] refers to weights between the first two layers
-                            
+
   for ℓ in 2:L
     push!(w, rand(layers[ℓ], layers[ℓ - 1]))     # random, but should have also negative values
     push!(d_w, zeros(layers[ℓ],layers[ℓ - 1]))
