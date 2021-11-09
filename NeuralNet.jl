@@ -5,6 +5,9 @@ struct NeuralNet
   ξ::Vector{Vector{Float64}}      # units activation
   w::Vector{Array{Float64,2}}     # weights
   θ::Vector{Vector{Float64}}      # thresholds
+  delta::Vector{Vector{Float64}}  # propagation errors
+  d_w::Vector{Array{Float64,2}}   # changes of weights
+  d_θ::Vector{Array{Float64,2}}   # changes of thresholds
 end
 
 function NeuralNet(layers::Vector{Int64})
@@ -14,19 +17,28 @@ function NeuralNet(layers::Vector{Int64})
   h = Vector{Float64}[]
   ξ = Vector{Float64}[]
   θ = Vector{Float64}[]
+  delta = Vector{Float64}[]
+  d_θ = Array{Float64}[]
   for ℓ in 1:L
     push!(h, zeros(layers[ℓ]))
     push!(ξ, zeros(layers[ℓ]))
-    push!(θ, rand(layers[ℓ]))                    # random, but should have also negative values
+    push!(θ, rand(layers[ℓ]))                     # random, but should have also negative values
+    push!(delta, zeros(layers[ℓ]))
+    push!(d_θ, zeros(layers[ℓ]))                   
   end
 
   w = Array{Float64,2}[]
-  push!(w, zeros(1, 1))                          # unused, but needed to ensure w[2] refers to weights between the first two layers
+  d_w = Array{Float64,2}[]
+
+  push!(d_w, zeros(1,1))
+  push!(w, zeros(1, 1))                           # unused, but needed to ensure w[2] refers to weights between the first two layers
+                            
   for ℓ in 2:L
     push!(w, rand(layers[ℓ], layers[ℓ - 1]))     # random, but should have also negative values
+    push!(d_w, zeros(layers[ℓ],layers[ℓ - 1]))
   end
 
-  return NeuralNet(L, n, h, ξ, w, θ)
+  return NeuralNet(L, n, h, ξ, w, θ, d_w, d_θ)
 end
 
 
@@ -61,7 +73,7 @@ end
 layers = [4; 9; 5; 1]
 nn = NeuralNet(layers)
 
-nn.L
+#=nn.L
 nn.n
 
 nn.ξ
@@ -76,4 +88,4 @@ y_out = zeros(nn.n[nn.L])
 
 feed_forward!(nn, x_in, y_out)
 
-y_out
+y_out=#
