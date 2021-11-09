@@ -7,28 +7,21 @@ function NeuralNet(layers::Vector{Int64})
   h = Vector{Float64}[]
   ξ = Vector{Float64}[]
   θ = Vector{Float64}[]
-  delta = Vector{Float64}[]
-  d_θ = Array{Float64}[]
   for ℓ in 1:L
     push!(h, zeros(layers[ℓ]))
     push!(ξ, zeros(layers[ℓ]))
     push!(θ, rand(layers[ℓ]))                     # random, but should have also negative values
-    push!(delta, zeros(layers[ℓ]))
-    push!(d_θ, zeros(layers[ℓ]))
   end
 
   w = Array{Float64,2}[]
-  d_w = Array{Float64,2}[]
 
-  push!(d_w, zeros(1,1))
   push!(w, zeros(1, 1))                           # unused, but needed to ensure w[2] refers to weights between the first two layers
 
   for ℓ in 2:L
     push!(w, rand(layers[ℓ], layers[ℓ - 1]))     # random, but should have also negative values
-    push!(d_w, zeros(layers[ℓ],layers[ℓ - 1]))
   end
 
-  return NeuralNet(L, n, h, ξ, w, θ, d_w, d_θ)
+  return NeuralNet(L, n, h, ξ, w, θ)
 end
 
 
