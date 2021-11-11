@@ -17,6 +17,7 @@ Functions :
 - [ ] MLR (use of an existing Julia lib)
 - [ ] Compute performance (automatisation of test process to find the best parameters for relative absolute error minimization)
 - [x] Data slicer (training-validation and test)
+- [ ] Plot results
 
 ## Datasets
 
