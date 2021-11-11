@@ -19,11 +19,11 @@ function NeuralNet(layers::Vector{Int64})
 
   w = Array{Float64,2}[]
   d_w = Array{Float64,2}[]
-  
+
 
   push!(w, zeros(1, 1))                           # unused, but needed to ensure w[2] refers to weights between the first two layers
   push!(d_w, zeros(1,1))
-  
+
 
   for ℓ in 2:L
     push!(w, rand(layers[ℓ], layers[ℓ - 1]))     # random, but should have also negative values
@@ -36,7 +36,7 @@ end
 # FEED FOWARD PROPAGATION
 function sigmoid(h::Float64)::Float64
     return 1 / (1 + exp(-h))
-  end
+end
 
 
 function feed_forward!(nn::NeuralNet, x_in::Vector{Float64}, y_out::Vector{Float64})
