@@ -8,25 +8,26 @@ function NeuralNet(layers::Vector{Int64})
   ξ = Vector{Float64}[]
   θ = Vector{Float64}[]
   delta = Vector{Float64}[]
+  d_θ = Vector{Float64}[]
   for ℓ in 1:L
     push!(h, zeros(layers[ℓ]))
     push!(ξ, zeros(layers[ℓ]))
     push!(θ, rand(layers[ℓ]))                     # random, but should have also negative values
     push!(delta, zeros(layers[ℓ]))
+    push!(d_θ, zeros(layers[ℓ]))
   end
 
   w = Array{Float64,2}[]
   d_w = Array{Float64,2}[]
-  d_θ = Array{Float64,2}[]
+  
 
   push!(w, zeros(1, 1))                           # unused, but needed to ensure w[2] refers to weights between the first two layers
   push!(d_w, zeros(1,1))
-  push!(d_θ, zeros(1,1))
+  
 
   for ℓ in 2:L
     push!(w, rand(layers[ℓ], layers[ℓ - 1]))     # random, but should have also negative values
     push!(d_w, zeros(layers[ℓ],layers[ℓ - 1]))
-    push!(d_θ, zeros(layers[ℓ],layers[ℓ - 1]))
   end
 
   return NeuralNet(L, n, h, ξ, w, θ, delta, d_w, d_θ)
@@ -87,8 +88,8 @@ function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64)
         nn.d_w[ℓ][i,j] = -η*nn.delta[ℓ][i]*nn.ξ[ℓ-1][j] + α*nn.d_w[ℓ][i,j]
         nn.w[ℓ][i,j] = nn.w[ℓ][i,j]+nn.d_w[ℓ][i,j]
       end
-      nn.d_θ[ℓ][i].=η*nn.delta[ℓ][i] + α*nn.d_θ[ℓ][i]
-      nn.θ[ℓ][i] = nn.θ[i]+nn.d_θ[ℓ][i]
+      nn.d_θ[ℓ][i] = η*nn.delta[ℓ][i] + α*nn.d_θ[ℓ][i]
+      nn.θ[ℓ][i] = nn.θ[ℓ][i]+nn.d_θ[ℓ][i]
     end
   end
 
@@ -98,22 +99,23 @@ end
 function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) #this section need to be looked at (see how to make use of the dataframes)
   epoch = 10
   y_out = zeros(nn.n[nn.L])
-
-  for ℓ in 1:epoch
+ for ℓ in 1:epoch
     for j in 1:size(data.train, 1)
       #random pattern
-      feed_forward!(nn, data.train[rand(1:size(data.train, 1)),:], y_out) #data should be a vector float
-      BPError(nn, y_out, data.test)
+      pattern = data.train[rand(1:size(data.train, 1)),:]
+      feed_forward!(nn, pattern, y_out) #data should be a vector float
+      BPError(nn, y_out, pattern)
       UpdateThresholdWeights(nn,η, α)
     end
+
   end
 end
 
-layers = [4; 9; 5; 1]
+layers = [5; 9; 5; 1]
 nn = NeuralNet(layers)
 data = DataSlicer("dataset/A1-turbine.txt", 0.85)
 
 η = 0.01
 α = 0.1
-
+#print(data.train[rand(1:size(data.train, 1)),1:size(data.train, 2)-1])
 BP(nn, data, η, α)

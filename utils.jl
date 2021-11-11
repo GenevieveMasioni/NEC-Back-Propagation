@@ -28,7 +28,7 @@ struct NeuralNet
   θ::Vector{Vector{Float64}}      # thresholds
   delta::Vector{Vector{Float64}}  # propagation errors
   d_w::Vector{Array{Float64,2}}   # changes of weights
-  d_θ::Vector{Array{Float64,2}}   # changes of thresholds
+  d_θ::Vector{Vector{Float64}}   # changes of thresholds
 end
 
 struct Dataset
