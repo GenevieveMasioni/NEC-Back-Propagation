@@ -1,11 +1,4 @@
-using CSV
-using DataFrames
 include("genevieve.jl")
-
-# CALL OF FILES
-#df = CSV.read("A1-synthetic.txt", DataFrame)
-#df = DataFrame(CSV.File("A1-synthetic.txt"))
-#print(df)
 
 function NeuralNet(layers::Vector{Int64})
   L = length(layers)
@@ -109,20 +102,18 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) #this sectio
   for ℓ in 1:epoch
     for j in 1:size(data.train, 1)
       #random pattern
-      feed_forward(nn, data.train[rand(1:size(data.train, 1)),:], y_out) #data should be a vector float
+      feed_forward!(nn, data.train[rand(1:size(data.train, 1)),:], y_out) #data should be a vector float
       BPError(nn, y_out, data.test)
       UpdateThresholdWeights(nn,η, α)
-
     end
-
   end
 end
 
 layers = [4; 9; 5; 1]
 nn = NeuralNet(layers)
-#data = DataSlicer("dataset/A1-turbine.txt", 0.85)
+data = DataSlicer("dataset/A1-turbine.txt", 0.85)
 
 η = 0.01
 α = 0.1
 
-#BP(nn, data, η, α)
+BP(nn, data, η, α)
