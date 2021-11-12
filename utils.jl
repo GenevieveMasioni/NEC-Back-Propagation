@@ -2,14 +2,15 @@
 using Pkg  # Package to install new packages
 
 # Install packages
-#=
+
 Pkg.add("CSV")
 Pkg.add("DataFrames")
 Pkg.add("GLM")
 Pkg.add("Plots")
 Pkg.add("Lathe")
 Pkg.add("MultivariateStats")
-=#
+Pkg.add("StatsModels")
+
 
 # Load the installed packages
 using CSV
@@ -18,6 +19,7 @@ using GLM
 using Plots
 using Lathe.preprocess: TrainTestSplit
 using MultivariateStats
+using StatsModels
 
 struct NeuralNet
   L::Int64                        # number of layers
@@ -32,9 +34,12 @@ struct NeuralNet
 end
 
 struct Dataset
+    names::Vector{Symbol}          # names of the features/ cols
     features::Int64                # number of features
     patterns::Int64                # number of patterns
     boundary::Float64              # percentage of patterns used for training-validation set [0,1]
     train::Array{Float64,2}        # training-validation set
     test::Array{Float64,2}         # test set
+    train_df::DataFrame            # training-validation set - Dataframe version
+    test_df::DataFrame             # test set - Dataframe version
 end
