@@ -80,15 +80,34 @@ function BPError(nn::NeuralNet, y_out::Vector{Float64}, data::Vector{Float64})
 end
 
 #UPDATE THRESHOLDS AND WEIGHTS
-function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64)
-
-  for ℓ in 2:nn.L
+function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64, p::Int64)
+  #sumw = 0
+  #sumθ = 0
+  for ℓ in 2:p:nn.L
     for i in 1:nn.n[ℓ]
       for j in 1:nn.n[ℓ-1]
-        nn.d_w[ℓ][i,j] = -η*nn.delta[ℓ][i]*nn.ξ[ℓ-1][j] + α*nn.d_w[ℓ][i,j]
+        sumw = 0
+        for k in 1:nn.L-1
+          if (size(nn.delta[ℓ+k-1],1)>=i)
+            if (size(nn.ξ[(ℓ-1)+k-1],1)>=j)
+              sumw += nn.delta[ℓ+k-1][i]*nn.ξ[(ℓ-1)+k-1][j]
+            end
+          else
+            break
+          end  
+        end
+        nn.d_w[ℓ][i,j] = -η*sumw + α*nn.d_w[ℓ][i,j]
         nn.w[ℓ][i,j] = nn.w[ℓ][i,j]+nn.d_w[ℓ][i,j]
       end
-      nn.d_θ[ℓ][i] = η*nn.delta[ℓ][i] + α*nn.d_θ[ℓ][i]
+      sumθ = 0
+      for k in 1:nn.L-1
+        if (size(nn.delta[ℓ+k-1],1)>=i)
+          sumθ += nn.delta[ℓ+k-1][i]
+        else
+          break
+        end
+      end
+      nn.d_θ[ℓ][i] = η*sumθ + α*nn.d_θ[ℓ][i]
       nn.θ[ℓ][i] = nn.θ[ℓ][i]+nn.d_θ[ℓ][i]
     end
   end
@@ -96,18 +115,29 @@ function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64)
 end
 #BACK PROPAGATE ALGORITHM
 
-function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) #this section need to be looked at (see how to make use of the dataframes)
+function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) 
   epoch = 10
   y_out = zeros(nn.n[nn.L])
- for ℓ in 1:epoch
-    for j in 1:size(data.train, 1)
-      #random pattern
-      pattern = data.train[rand(1:size(data.train, 1)),:]
-      feed_forward!(nn, pattern, y_out) #data should be a vector float
-      BPError(nn, y_out, pattern)
-      UpdateThresholdWeights(nn,η, α)
-    end
+  y_out1 = zeros(nn.n[nn.L])
+  y_out2 = zeros(nn.n[nn.L])
+  batch = 5
 
+  MSETrain = 0
+  MSETest = 0
+ for ℓ in 1:epoch
+  for i in 1:batch:size(data.train, 1)
+    for j in 1:batch
+      #pattern = data.train[rand(1:size(data.train, 1)),:]
+      pattern = data.train[rand(i:batch+i-1),:]
+      feed_forward!(nn, pattern, y_out) 
+      BPError(nn, y_out, pattern)  
+    end
+    UpdateThresholdWeights(nn,η, α, batch)
+  end
+    #=feed_forward!(nn, data.train[:,:], y_out1)
+    feed_forward!(nn, data.test[:,:], y_out2)
+    MSETrain = (data.train[:,size(data.train, 2):] - y_out1)^2 
+    MSETest = (y_out - y_out2)^2=#
   end
 end
 
@@ -117,5 +147,6 @@ data = DataSlicer("dataset/A1-turbine.txt", 0.85)
 
 η = 0.01
 α = 0.1
-#print(data.train[rand(1:size(data.train, 1)),1:size(data.train, 2)-1])
+#print(size(data.train,1))
+#print(data.train[:, size(data.train, 2):])
 BP(nn, data, η, α)
