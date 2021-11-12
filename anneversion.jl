@@ -118,22 +118,26 @@ end
 function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) 
   epoch = 10
   y_out = zeros(nn.n[nn.L])
-  y_out1 = zeros(nn.n[nn.L])
-  y_out2 = zeros(nn.n[nn.L])
+  #y_out1 = zeros(nn.n[nn.L])
+  #y_out2 = zeros(nn.n[nn.L])
   batch = 5
 
   MSETrain = 0
   MSETest = 0
  for ℓ in 1:epoch
-  for i in 1:batch:size(data.train, 1)
-    for j in 1:batch
-      #pattern = data.train[rand(1:size(data.train, 1)),:]
-      pattern = data.train[rand(i:batch+i-1),:]
-      feed_forward!(nn, pattern, y_out) 
-      BPError(nn, y_out, pattern)  
+    for i in 1:batch:size(data.train, 1)
+      for j in 1:batch
+        #pattern = data.train[rand(1:size(data.train, 1)),:]
+        if i+batch>size(data.train, 1)
+          pattern = data.train[rand(i:size(data.train, 1)),:]
+        else
+          pattern = data.train[rand(i:batch+i-1),:]
+        end
+        feed_forward!(nn, pattern, y_out) 
+        BPError(nn, y_out, pattern)  
+      end
+      UpdateThresholdWeights(nn,η, α, batch)
     end
-    UpdateThresholdWeights(nn,η, α, batch)
-  end
     #=feed_forward!(nn, data.train[:,:], y_out1)
     feed_forward!(nn, data.test[:,:], y_out2)
     MSETrain = (data.train[:,size(data.train, 2):] - y_out1)^2 
