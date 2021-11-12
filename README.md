@@ -14,7 +14,7 @@ Functions :
 - [ ] Data normalization (all datasets)
 - [ ] Cross-validation (MLR and BP)
 - [ ] BP
-- [ ] MLR (use of an existing Julia lib)
+- [x] MLR (use of an existing Julia lib)
 - [ ] Compute performance (automatisation of test process to find the best parameters for relative absolute error minimization)
 - [x] Data slicer (training-validation and test)
 - [ ] Plot results
