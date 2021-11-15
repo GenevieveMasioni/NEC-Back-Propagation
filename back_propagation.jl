@@ -113,44 +113,60 @@ function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64, p::Int6
 end
 #BACK PROPAGATE ALGORITHM
 
+function QuadraticError(y_pred::Vector{Float64}, y_true::Vector{Float64}, nrObservation)
+  MSE = 0
+  for i in size(y_pred,1)
+    MSE += (y_true[i]-y_pred[i])^2
+  end
+  MSE = MSE/nrObservation
+  return MSE
+end
+
 function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) 
   epoch = 10
   y_out = zeros(nn.n[nn.L])
-  #y_out1 = zeros(nn.n[nn.L])
-  #y_out2 = zeros(nn.n[nn.L])
+  y_predTr = zeros(size(data.train, 1))
+  y_predTe = zeros(size(data.test, 1))
   batch = 5
 
-  MSETrain = 0
-  MSETest = 0
+  MSETrain = zeros(epoch)
+  MSETest = zeros(epoch)
  for ℓ in 1:epoch
     for i in 1:batch:size(data.train, 1)
       for j in 1:batch
         if i+batch>size(data.train, 1)
           rndNum = rand(i:size(data.train, 1))
-          x_in = data.train[rndNum,1:size(data.train,2)-1]
+          x_in = data.train[rndNum,1:size(data.train,2)-1]/10000
         else
           rndNum = rand(i:batch+i-1)
-          x_in = data.train[rndNum,1:size(data.train,2)-1] 
+          x_in = data.train[rndNum,1:size(data.train,2)-1]/10000
         end
-        z = data.train[rndNum,size(data.train,2)]
+        z = data.train[rndNum,size(data.train,2)]/10000
         
-        feed_forward!(nn, x_in, y_out) 
-        #println("Y_out: ",y_out)
-        
+        feed_forward!(nn, x_in, y_out)  
         BPError(nn, y_out, z)  
+        println(y_out*10000)
       end
       UpdateThresholdWeights(nn,η, α, batch)
     end
-   #= for k in 1:size(data.train,1)
-      #println(data.train[k,:])
-      feed_forward!(nn, data.train[k,:size(data.train, 2)-1], y_out1)
-      println("y_out 1 for pattern ", k, " is: ", y_out1)
-      #println("Last y_out is: ", y_out)
-    end=#
-    #=feed_forward!(nn, data.train[:,:], y_out1)
-    feed_forward!(nn, data.test[:,:], y_out2)
-    MSETrain = (data.train[:,size(data.train, 2):] - y_out1)^2 
-    MSETest = (y_out - y_out2)^2=#
+    #Quadratic Errors
+    println("Quadratic ERROR")
+    for k in 1:size(data.train,1)
+      x_in = data.train[k,1:size(data.train, 2)-1]/10000
+      feed_forward!(nn, x_in, y_out)
+      y_predTr[k] = y_out[1]
+    end
+    for k in 1:size(data.test,1)
+      x_in = data.test[k,1:size(data.test, 2)-1]/10000
+      feed_forward!(nn, x_in, y_out)
+      y_predTe[k] = y_out[1]
+    end
+    y_train = data.train[:,size(data.train, 2)]/10000
+    MSETrain[ℓ]= QuadraticError(y_predTr, y_train, size(data.train, 1))
+
+    y_test = data.test[:,size(data.test, 2)]/10000
+    MSETest[ℓ]= QuadraticError(y_predTe, y_test, size(data.test, 1))
+     
   end
 end
 
