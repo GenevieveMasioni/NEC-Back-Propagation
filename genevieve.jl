@@ -1,10 +1,24 @@
 include("utils.jl")
 
-function normalisation(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.0, s_max::Float64 = 1.0)
+# for columns of a DataFrame
+function getRanges(df::DataFrame)
+  ranges = Vector{Tuple}()
+  cols = size(df, 2)
+
+  for i in 1:cols
+    tuple = (minimum(df[:,i]), maximum(df[:,i]))
+    push!(ranges, tuple)
+  end
+  return ranges
+end
+
+function scale(df::DataFrame, s_min::Float64 = 0.0, s_max::Float64 = 1.0)
   # outliers’ detection, treatment of missing data,
   # transformation of categorical data into an appropriate numeric representation, etc
   rows = size(df, 1)
   cols = size(df, 2)
+
+  ranges = getRanges(df)
 
   for i in 1:rows
     for j in 1:cols
@@ -17,10 +31,23 @@ function normalisation(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.
   end
 end
 
-function descale(data::Dataset)
+function descale(df::DataFrame, s_min::Float64 = 0.0, s_max::Float64 = 1.0)
   # outliers’ detection, treatment of missing data,
   # transformation of categorical data into an appropriate numeric representation, etc
-  return data
+  rows = size(df, 1)
+  cols = size(df, 2)
+
+  ranges = getRanges(df)
+
+  for i in 1:rows
+    for j in 1:cols
+      s = df[i,j]
+      x_min = ranges[j][1]
+      x_max = ranges[j][2]
+      x = x_min + ((x_max - x_min)/(s_max - s_min)) * (s - s_min)
+      df[i,j] = x
+    end
+  end
 end
 
 # slicer : [0,1] with 1 = 100%, default 80 %
@@ -30,22 +57,14 @@ function DataSlicer(path::String, boundary::Float64 = 0.8)
   rows = size(df, 1)
   cols = size(df, 2)
   names = propertynames(df)
-  ranges = Vector{Tuple}()
 
-  println(df[2,3])
-  for i in 1:cols
-    tuple = (minimum(df[:,i]), maximum(df[:,i]))
-    push!(ranges, tuple)
-  end
-
-  normalisation(df, ranges)
-  println(df[2,3])
   train, test = TrainTestSplit(df, boundary)
+  scale(train)
+  scale(test)
 
   println("Features : ", cols, " | Patterns : ", rows, " | Boundary : ", boundary, " | Training : ", size(train, 1), " | Test : ", size(test, 1))
-  println(ranges)
 
-  return Dataset(names, cols, rows, ranges, boundary, Matrix(train), Matrix(test), train, test)
+  return Dataset(names, cols, rows, boundary, Matrix(train), Matrix(test), train, test)
 end
 
 # Mean Absolute Percentage Error
