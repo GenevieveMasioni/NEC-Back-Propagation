@@ -62,60 +62,104 @@ function feed_forward!(nn::NeuralNet, x_in::Vector{Float64}, y_out::Vector{Float
 end
 
 #BACK PROPAGATE ERROR
-function BPError(nn::NeuralNet, y_out::Vector{Float64}, data::Vector{Float64})
-  current_error = 0
+function BPError(nn::NeuralNet, y_out::Vector{Float64}, z::Float64)#data::Vector{Float64})
 
   for i in 1:nn.n[nn.L]
-    nn.delta[nn.L][i] = sigmoid(nn.h[nn.L][i])*(y_out[i]- data[i])
+    nn.delta[nn.L][i] = sigmoid(nn.h[nn.L][i])*(y_out[i] - z)
   end
   for ℓ in 2:nn.L
     for j in 1:nn.n[ℓ-1]
+      current_error = 0
       for i in 1:nn.n[ℓ]
-        current_error += nn.delta[ℓ][i]*nn.w[ℓ][i,j]
+        current_error += nn.delta[ℓ][i]*nn.w[ℓ][i,j]   
       end
       nn.delta[ℓ-1][j] = sigmoid(nn.h[ℓ-1][j]) * current_error
     end
   end
-
 end
 
 #UPDATE THRESHOLDS AND WEIGHTS
-function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64)
-
-  for ℓ in 2:nn.L
+function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64, p::Int64)
+  #sumw = 0
+  #sumθ = 0
+  for ℓ in 2:p:nn.L
     for i in 1:nn.n[ℓ]
       for j in 1:nn.n[ℓ-1]
-        nn.d_w[ℓ][i,j] = -η*nn.delta[ℓ][i]*nn.ξ[ℓ-1][j] + α*nn.d_w[ℓ][i,j]
+        sumw = 0
+        for k in 1:nn.L-1
+          if (size(nn.delta[ℓ+k-1],1)>=i)
+            if (size(nn.ξ[(ℓ-1)+k-1],1)>=j)
+              sumw += nn.delta[ℓ+k-1][i]*nn.ξ[(ℓ-1)+k-1][j]
+            end
+          else
+            break
+          end  
+        end
+        nn.d_w[ℓ][i,j] = -η*sumw + α*nn.d_w[ℓ][i,j]
         nn.w[ℓ][i,j] = nn.w[ℓ][i,j]+nn.d_w[ℓ][i,j]
       end
-      nn.d_θ[ℓ][i] = η*nn.delta[ℓ][i] + α*nn.d_θ[ℓ][i]
+      sumθ = 0
+      for k in 1:nn.L-1
+        if (size(nn.delta[ℓ+k-1],1)>=i)
+          sumθ += nn.delta[ℓ+k-1][i]
+        else
+          break
+        end
+      end
+      nn.d_θ[ℓ][i] = η*sumθ + α*nn.d_θ[ℓ][i]
       nn.θ[ℓ][i] = nn.θ[ℓ][i]+nn.d_θ[ℓ][i]
     end
   end
-
 end
 #BACK PROPAGATE ALGORITHM
 
-function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) #this section need to be looked at (see how to make use of the dataframes)
+function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) 
   epoch = 10
   y_out = zeros(nn.n[nn.L])
- for ℓ in 1:epoch
-    for j in 1:size(data.train, 1)
-      #random pattern
-      pattern = data.train[rand(1:size(data.train, 1)),:]
-      feed_forward!(nn, pattern, y_out) #data should be a vector float
-      BPError(nn, y_out, pattern)
-      UpdateThresholdWeights(nn,η, α)
-    end
+  #y_out1 = zeros(nn.n[nn.L])
+  #y_out2 = zeros(nn.n[nn.L])
+  batch = 5
 
+  MSETrain = 0
+  MSETest = 0
+ for ℓ in 1:epoch
+    for i in 1:batch:size(data.train, 1)
+      for j in 1:batch
+        if i+batch>size(data.train, 1)
+          rndNum = rand(i:size(data.train, 1))
+          x_in = data.train[rndNum,1:size(data.train,2)-1]
+        else
+          rndNum = rand(i:batch+i-1)
+          x_in = data.train[rndNum,1:size(data.train,2)-1] 
+        end
+        z = data.train[rndNum,size(data.train,2)]
+        
+        feed_forward!(nn, x_in, y_out) 
+        #println("Y_out: ",y_out)
+        
+        BPError(nn, y_out, z)  
+      end
+      UpdateThresholdWeights(nn,η, α, batch)
+    end
+   #= for k in 1:size(data.train,1)
+      #println(data.train[k,:])
+      feed_forward!(nn, data.train[k,:size(data.train, 2)-1], y_out1)
+      println("y_out 1 for pattern ", k, " is: ", y_out1)
+      #println("Last y_out is: ", y_out)
+    end=#
+    #=feed_forward!(nn, data.train[:,:], y_out1)
+    feed_forward!(nn, data.test[:,:], y_out2)
+    MSETrain = (data.train[:,size(data.train, 2):] - y_out1)^2 
+    MSETest = (y_out - y_out2)^2=#
   end
 end
 
-layers = [5; 9; 5; 1]
-nn = NeuralNet(layers)
 data = DataSlicer("dataset/A1-turbine.txt", 0.85)
+layers = [size(data.train,2)-1; 9; 5; 1]
+nn = NeuralNet(layers)
 
-η = 0.01
-α = 0.1
-#print(data.train[rand(1:size(data.train, 1)),1:size(data.train, 2)-1])
+η = 0.1
+α = 0.5
+#println(size(data.train,2))
+#println(data.train[1, 1:size(data.train,2)-1])
 BP(nn, data, η, α)
