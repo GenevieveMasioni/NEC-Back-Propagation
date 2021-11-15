@@ -11,7 +11,7 @@ Prediction using the following algorithms:
 ## Tasks list
 Functions :
 - [ ] Data preprocessing (third dataset)
-- [ ] Data normalization (all datasets)
+- [x] Data normalization (all datasets)
 - [ ] Cross-validation (MLR and BP)
 - [ ] BP
 - [x] MLR (use of an existing Julia lib)

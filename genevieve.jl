@@ -1,21 +1,51 @@
 include("utils.jl")
 
+function normalisation(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.0, s_max::Float64 = 1.0)
+  # outliers’ detection, treatment of missing data,
+  # transformation of categorical data into an appropriate numeric representation, etc
+  rows = size(df, 1)
+  cols = size(df, 2)
+
+  for i in 1:rows
+    for j in 1:cols
+      x = df[i,j]
+      x_min = ranges[j][1]
+      x_max = ranges[j][2]
+      s = s_min + ((s_max - s_min)/(x_max - x_min)) * (x - x_min)
+      df[i,j] = s
+    end
+  end
+end
+
+function descale(data::Dataset)
+  # outliers’ detection, treatment of missing data,
+  # transformation of categorical data into an appropriate numeric representation, etc
+  return data
+end
+
 # slicer : [0,1] with 1 = 100%, default 80 %
 function DataSlicer(path::String, boundary::Float64 = 0.8)
   println("...DataSlicer()")
   df = DataFrame(CSV.File(path))
   rows = size(df, 1)
   cols = size(df, 2)
+  names = propertynames(df)
+  ranges = Vector{Tuple}()
+
+  println(df[2,3])
+  for i in 1:cols
+    tuple = (minimum(df[:,i]), maximum(df[:,i]))
+    push!(ranges, tuple)
+  end
+
+  normalisation(df, ranges)
+  println(df[2,3])
   train, test = TrainTestSplit(df, boundary)
-  names = propertynames(train)
+
   println("Features : ", cols, " | Patterns : ", rows, " | Boundary : ", boundary, " | Training : ", size(train, 1), " | Test : ", size(test, 1))
-  #println(names)
+  println(ranges)
 
-  return Dataset(names, cols, rows, boundary, Matrix(train), Matrix(test), train, test)
-end
-
-function normalisation(data::Dataset)
-  return data
+  return Dataset(names, cols, rows, ranges, boundary, Matrix(train), Matrix(test), train, test)
 end
 
 # Mean Absolute Percentage Error
@@ -65,7 +95,6 @@ function Multilinear_regression(data::Dataset)
   # Histogram of error to see if it's normally distributed on train and test datasets
   histogram(performance_train.error, bins = 50, title = "Train Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
   histogram(performance_test.error, bins = 50, title = "Test Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
-
 end
 
 data = DataSlicer("dataset/A1-turbine.txt", 0.85)

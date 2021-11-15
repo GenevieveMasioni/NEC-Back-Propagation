@@ -38,6 +38,7 @@ struct Dataset
     names::Vector{Symbol}          # names of the features/ cols
     features::Int64                # number of features
     patterns::Int64                # number of patterns
+    ranges::Vector{Tuple}          # names of the features/ cols
     boundary::Float64              # percentage of patterns used for training-validation set [0,1]
     train::Array{Float64,2}        # training-validation set
     test::Array{Float64,2}         # test set
