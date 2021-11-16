@@ -10,6 +10,7 @@ Pkg.add("Plots")
 Pkg.add("Lathe")
 #Pkg.add("MultivariateStats")
 Pkg.add("StatsModels")
+Pkg.add("StatsPlots")
 =#
 
 # Load the installed packages
@@ -17,6 +18,7 @@ using CSV
 using DataFrames
 using GLM
 using Plots
+using StatsPlots
 using Lathe.preprocess: TrainTestSplit
 #using MultivariateStats
 using StatsModels

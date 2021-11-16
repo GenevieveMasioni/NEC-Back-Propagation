@@ -52,8 +52,10 @@ function feed_forward!(nn::NeuralNet, x_in::Vector{Float64}, y_out::Vector{Float
           h += nn.w[ℓ][i, j] * nn.ξ[ℓ - 1][j]
         end
         # save field and calculate activation, Eq. (7)
+        #if ℓ != nn.L
         nn.h[ℓ][i] = h
         nn.ξ[ℓ][i] = sigmoid(h)
+        #end
       end
     end
 
@@ -115,10 +117,13 @@ end
 
 function QuadraticError(y_pred::Vector{Float64}, y_true::Vector{Float64}, nrObservation)
   MSE = 0
+  sumY = 0
   for i in size(y_pred,1)
-    MSE += (y_true[i]-y_pred[i])^2
+    MSE += abs(y_pred[i]-y_true[i])
+    sumY += y_pred[i]
   end
-  MSE = MSE/nrObservation
+
+  MSE = (MSE/sumY)*100
   return MSE
 end
 
@@ -128,7 +133,8 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
   y_predTr = zeros(size(data.train, 1))
   y_predTe = zeros(size(data.test, 1))
   batch = 5
-
+  y_test= zeros(size(data.test, 1))
+  y_train= zeros(size(data.train, 1))
   MSETrain = zeros(epoch)
   MSETest = zeros(epoch)
  for ℓ in 1:epoch
@@ -136,38 +142,48 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
       for j in 1:batch
         if i+batch>size(data.train, 1)
           rndNum = rand(i:size(data.train, 1))
-          x_in = data.train[rndNum,1:size(data.train,2)-1]/10000
+          x_in = data.train[rndNum,1:size(data.train,2)-1]
         else
           rndNum = rand(i:batch+i-1)
-          x_in = data.train[rndNum,1:size(data.train,2)-1]/10000
+          x_in = data.train[rndNum,1:size(data.train,2)-1]
         end
-        z = data.train[rndNum,size(data.train,2)]/10000
-        
+      #rndNum = rand(1:size(data.train, 1))
+      #x_in=data.train[rndNum,1:size(data.train,2)-1]
+        z = data.train[rndNum,size(data.train,2)]
         feed_forward!(nn, x_in, y_out)  
         BPError(nn, y_out, z)  
-        println(y_out*10000)
       end
       UpdateThresholdWeights(nn,η, α, batch)
     end
     #Quadratic Errors
     println("Quadratic ERROR")
     for k in 1:size(data.train,1)
-      x_in = data.train[k,1:size(data.train, 2)-1]/10000
+      x_in = data.train[k,1:size(data.train, 2)-1]
       feed_forward!(nn, x_in, y_out)
       y_predTr[k] = y_out[1]
+      
     end
     for k in 1:size(data.test,1)
-      x_in = data.test[k,1:size(data.test, 2)-1]/10000
+      x_in = data.test[k,1:size(data.test, 2)-1]
       feed_forward!(nn, x_in, y_out)
       y_predTe[k] = y_out[1]
     end
-    y_train = data.train[:,size(data.train, 2)]/10000
+    y_train = data.train[:,size(data.train, 2)]
     MSETrain[ℓ]= QuadraticError(y_predTr, y_train, size(data.train, 1))
 
-    y_test = data.test[:,size(data.test, 2)]/10000
+    y_test = data.test[:,size(data.test, 2)]
     MSETest[ℓ]= QuadraticError(y_predTe, y_test, size(data.test, 1))
      
+    println("Epoch: ",ℓ," MSETrain: ", MSETrain[ℓ], " MSETest: ",MSETest[ℓ])  
   end
+  #Plot real vs predicted
+  figureRPTr = scatter(y_predTr, y_train)
+  figureRPTe = scatter(y_predTe, y_test)
+  plot(y_predTr, y_train)
+  plot(figureRPTe)
+  #Plots
+  figure1 = scatter(epoch, MSETrain)
+  
 end
 
 data = DataSlicer("dataset/A1-turbine.txt", 0.85)
