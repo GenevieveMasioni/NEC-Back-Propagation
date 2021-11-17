@@ -1,76 +1,5 @@
 include("utils.jl")
 
-# for columns of a DataFrame
-function getRanges(df::DataFrame)
-  ranges = Vector{Tuple}()
-  cols = size(df, 2)
-
-  for i in 1:cols
-    tuple = (minimum(df[:,i]), maximum(df[:,i]))
-    push!(ranges, tuple)
-  end
-  return ranges
-end
-
-function scale(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.0, s_max::Float64 = 1.0)
-  # outliers’ detection, treatment of missing data,
-  # transformation of categorical data into an appropriate numeric representation, etc
-  rows = size(df, 1)
-  cols = size(df, 2)
-
-  #ranges = getRanges(df)
-
-  for i in 1:rows
-    for j in 1:cols
-      x = df[i,j]
-      x_min = ranges[j][1]
-      x_max = ranges[j][2]
-      s = s_min + ((s_max - s_min)/(x_max - x_min)) * (x - x_min)
-      df[i,j] = s
-    end
-  end
-end
-
-function descale(df::DataFrame, ranges::Vector{Tuple},s_min::Float64 = 0.0, s_max::Float64 = 1.0)
-  # outliers’ detection, treatment of missing data,
-  # transformation of categorical data into an appropriate numeric representation, etc
-  rows = size(df, 1)
-  cols = size(df, 2)
-
-  #ranges = getRanges(df)
-
-  for i in 1:rows
-    for j in 1:cols
-      s = df[i,j]
-      x_min = ranges[j][1]
-      x_max = ranges[j][2]
-      x = x_min + ((x_max - x_min)/(s_max - s_min)) * (s - s_min)
-      df[i,j] = x
-    end
-  end
-end
-
-# slicer : [0,1] with 1 = 100%, default 80 %
-function DataSlicer(path::String, boundary::Float64 = 0.8)
-  println("...DataSlicer()")
-  df = DataFrame(CSV.File(path))
-  rows = size(df, 1)
-  cols = size(df, 2)
-  names = propertynames(df)
-  
-  train, test = TrainTestSplit(df, boundary)
-  rangesTest = getRanges(test)
-  rangesTrain = getRanges(train)
-
-  dataset = Dataset(names, cols, rows, boundary, Matrix(train), Matrix(test), train, test, rangesTrain, rangesTest)
-  scale(train, rangesTrain)
-  scale(test, rangesTest)
-  
-  println("Features : ", cols, " | Patterns : ", rows, " | Boundary : ", boundary, " | Training : ", size(train, 1), " | Test : ", size(test, 1))
-
-  return dataset
-end
-
 # Mean Absolute Percentage Error
 function mape(performance)
   mape = mean(abs.(performance.error./performance.y_actual))
@@ -120,5 +49,4 @@ function Multilinear_regression(data::Dataset)
   histogram(performance_test.error, bins = 50, title = "Test Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
 end
 
-#data = DataSlicer("dataset/A1-turbine.txt", 0.85)
-#Multilinear_regression(data)
+

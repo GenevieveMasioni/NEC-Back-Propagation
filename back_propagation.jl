@@ -1,4 +1,4 @@
-include("genevieve.jl")
+include("utils.jl")
 
 function NeuralNet(layers::Vector{Int64})
   L = length(layers)
@@ -174,7 +174,6 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
   end
   #Plot real vs predicted
   
-  println( y_train)
   figureRPTr = scatter(y_predTr, y_train)
   figureRPTe = scatter(y_predTe, y_test)
   display(figureRPTr)
@@ -190,12 +189,3 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
   readline()
   gui()
 end
-
-data = DataSlicer("dataset/A1-turbine.txt", 0.85)
-layers = [size(data.train,2)-1; 9; 5; 1]
-nn = NeuralNet(layers)
-
-η = 0.05
-α = 0.1
-
-BP(nn, data, η, α)
