@@ -52,10 +52,8 @@ function feed_forward!(nn::NeuralNet, x_in::Vector{Float64}, y_out::Vector{Float
           h += nn.w[ℓ][i, j] * nn.ξ[ℓ - 1][j]
         end
         # save field and calculate activation, Eq. (7)
-        #if ℓ != nn.L
         nn.h[ℓ][i] = h
         nn.ξ[ℓ][i] = sigmoid(h)
-        #end
       end
     end
 
@@ -82,8 +80,6 @@ end
 
 #UPDATE THRESHOLDS AND WEIGHTS
 function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64, p::Int64)
-  #sumw = 0
-  #sumθ = 0
   for ℓ in 2:p:nn.L
     for i in 1:nn.n[ℓ]
       for j in 1:nn.n[ℓ-1]
@@ -177,21 +173,29 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
     println("Epoch: ",ℓ," MSETrain: ", MSETrain[ℓ], " MSETest: ",MSETest[ℓ])  
   end
   #Plot real vs predicted
+  
+  println( y_train)
   figureRPTr = scatter(y_predTr, y_train)
   figureRPTe = scatter(y_predTe, y_test)
-  plot(y_predTr, y_train)
-  plot(figureRPTe)
+  display(figureRPTr)
+  readline()
+  display(figureRPTe)
+  readline()
   #Plots
-  figure1 = scatter(epoch, MSETrain)
-  
+  figureMSETR = scatter(MSETrain)
+  figureMSETE = scatter(MSETest)
+  display(figureMSETR)
+  readline()
+  display(figureMSETE)
+  readline()
+  gui()
 end
 
 data = DataSlicer("dataset/A1-turbine.txt", 0.85)
 layers = [size(data.train,2)-1; 9; 5; 1]
 nn = NeuralNet(layers)
 
-η = 0.1
-α = 0.5
-#println(size(data.train,2))
-#println(data.train[1, 1:size(data.train,2)-1])
+η = 0.05
+α = 0.1
+
 BP(nn, data, η, α)

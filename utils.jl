@@ -45,4 +45,6 @@ struct Dataset
     test::Array{Float64,2}         # test set
     train_df::DataFrame            # training-validation set - Dataframe version
     test_df::DataFrame             # test set - Dataframe version
+    rangesTrain::Vector{Tuple}
+    rangesTest::Vector{Tuple}
 end

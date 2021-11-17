@@ -12,13 +12,13 @@ function getRanges(df::DataFrame)
   return ranges
 end
 
-function scale(df::DataFrame, s_min::Float64 = 0.0, s_max::Float64 = 1.0)
+function scale(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.0, s_max::Float64 = 1.0)
   # outliers’ detection, treatment of missing data,
   # transformation of categorical data into an appropriate numeric representation, etc
   rows = size(df, 1)
   cols = size(df, 2)
 
-  ranges = getRanges(df)
+  #ranges = getRanges(df)
 
   for i in 1:rows
     for j in 1:cols
@@ -31,13 +31,13 @@ function scale(df::DataFrame, s_min::Float64 = 0.0, s_max::Float64 = 1.0)
   end
 end
 
-function descale(df::DataFrame, s_min::Float64 = 0.0, s_max::Float64 = 1.0)
+function descale(df::DataFrame, ranges::Vector{Tuple},s_min::Float64 = 0.0, s_max::Float64 = 1.0)
   # outliers’ detection, treatment of missing data,
   # transformation of categorical data into an appropriate numeric representation, etc
   rows = size(df, 1)
   cols = size(df, 2)
 
-  ranges = getRanges(df)
+  #ranges = getRanges(df)
 
   for i in 1:rows
     for j in 1:cols
@@ -57,14 +57,18 @@ function DataSlicer(path::String, boundary::Float64 = 0.8)
   rows = size(df, 1)
   cols = size(df, 2)
   names = propertynames(df)
-
+  
   train, test = TrainTestSplit(df, boundary)
-  scale(train)
-  scale(test)
+  rangesTest = getRanges(test)
+  rangesTrain = getRanges(train)
 
+  dataset = Dataset(names, cols, rows, boundary, Matrix(train), Matrix(test), train, test, rangesTrain, rangesTest)
+  scale(train, rangesTrain)
+  scale(test, rangesTest)
+  
   println("Features : ", cols, " | Patterns : ", rows, " | Boundary : ", boundary, " | Training : ", size(train, 1), " | Test : ", size(test, 1))
 
-  return Dataset(names, cols, rows, boundary, Matrix(train), Matrix(test), train, test)
+  return dataset
 end
 
 # Mean Absolute Percentage Error
@@ -116,5 +120,5 @@ function Multilinear_regression(data::Dataset)
   histogram(performance_test.error, bins = 50, title = "Test Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
 end
 
-data = DataSlicer("dataset/A1-turbine.txt", 0.85)
-Multilinear_regression(data)
+#data = DataSlicer("dataset/A1-turbine.txt", 0.85)
+#Multilinear_regression(data)
