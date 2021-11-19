@@ -116,5 +116,53 @@ function Multilinear_regression(data::Dataset)
   histogram(performance_test.error, bins = 50, title = "Test Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
 end
 
+# repeat the training process n-folds times and find optimal parameters (architecture, learning rate, momemtum nnuomber of epochs)
+function crossValidation(data::Dataset, nbFolds::Int64)
+  println("...crossValidation()")
+  errors = []
+  folds = []
+  foldSize = round(Int64, size(data.train_df, 1) / nbFolds)
+  println("Fold size : ", foldSize)
+
+  for i in 1:nbFolds
+    start = (i-1) * foldSize + 1
+    max = i * foldSize
+    println("start = ", start, " ; max = ", max)
+    fold = data.train_df[start:max, :]
+    push!(folds, fold)
+  end
+
+  for i in 1:nbFolds
+    # train with folds-1 subsets and validate with the last one
+    S_i = folds[i]
+    S = copy(folds)
+    println(S)
+    deleteat!(S, i)
+    S = hcat(select.(S)...)
+    println(S)
+    # compute error x
+  end
+  # computer global error
+  prediction_error = Base.sum(errors)/size(errors,1)
+  return prediction_error
+end
+
+#=
+Another function : compute perf
+once best params found, train complete dataset with those params
+and test with test dataset / Use final NN to predict over test dataset
+Evaluate test error
+
+function findBestParameters()
+  # inputs : user inputs (epochs, folds, etc.)
+  crossValidation() # run x times and store prediction errors and value of params
+  # select params with lowest prediction error
+  # training with complete training dataset
+  # evaluation using test dataset => final error
+end
+=#
+
 data = DataSlicer("dataset/A1-turbine.txt", 0.85)
-Multilinear_regression(data)
+#Multilinear_regression(data)
+error = crossValidation(data, 4)
+println(error)
