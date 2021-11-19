@@ -1,4 +1,4 @@
-include("genevieve.jl")
+include("utils.jl")
 
 function NeuralNet(layers::Vector{Int64})
   L = length(layers)
@@ -80,8 +80,6 @@ end
 
 #UPDATE THRESHOLDS AND WEIGHTS
 function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64, p::Int64)
-  #sumw = 0
-  #sumθ = 0
   for ℓ in 2:p:nn.L
     for i in 1:nn.n[ℓ]
       for j in 1:nn.n[ℓ-1]
@@ -113,15 +111,28 @@ function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64, p::Int6
 end
 #BACK PROPAGATE ALGORITHM
 
+function QuadraticError(y_pred::Vector{Float64}, y_true::Vector{Float64}, nrObservation)
+  MSE = 0
+  sumY = 0
+  for i in size(y_pred,1)
+    MSE += abs(y_pred[i]-y_true[i])
+    sumY += y_pred[i]
+  end
+
+  MSE = (MSE/sumY)*100
+  return MSE
+end
+
 function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) 
   epoch = 10
   y_out = zeros(nn.n[nn.L])
-  #y_out1 = zeros(nn.n[nn.L])
-  #y_out2 = zeros(nn.n[nn.L])
+  y_predTr = zeros(size(data.train, 1))
+  y_predTe = zeros(size(data.test, 1))
   batch = 5
-
-  MSETrain = 0
-  MSETest = 0
+  y_test= zeros(size(data.test, 1))
+  y_train= zeros(size(data.train, 1))
+  MSETrain = zeros(epoch)
+  MSETest = zeros(epoch)
  for ℓ in 1:epoch
     for i in 1:batch:size(data.train, 1)
       for j in 1:batch
@@ -130,36 +141,51 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
           x_in = data.train[rndNum,1:size(data.train,2)-1]
         else
           rndNum = rand(i:batch+i-1)
-          x_in = data.train[rndNum,1:size(data.train,2)-1] 
+          x_in = data.train[rndNum,1:size(data.train,2)-1]
         end
+      #rndNum = rand(1:size(data.train, 1))
+      #x_in=data.train[rndNum,1:size(data.train,2)-1]
         z = data.train[rndNum,size(data.train,2)]
-        
-        feed_forward!(nn, x_in, y_out) 
-        #println("Y_out: ",y_out)
-        
+        feed_forward!(nn, x_in, y_out)  
         BPError(nn, y_out, z)  
       end
       UpdateThresholdWeights(nn,η, α, batch)
     end
-   #= for k in 1:size(data.train,1)
-      #println(data.train[k,:])
-      feed_forward!(nn, data.train[k,:size(data.train, 2)-1], y_out1)
-      println("y_out 1 for pattern ", k, " is: ", y_out1)
-      #println("Last y_out is: ", y_out)
-    end=#
-    #=feed_forward!(nn, data.train[:,:], y_out1)
-    feed_forward!(nn, data.test[:,:], y_out2)
-    MSETrain = (data.train[:,size(data.train, 2):] - y_out1)^2 
-    MSETest = (y_out - y_out2)^2=#
+    #Quadratic Errors
+    println("Quadratic ERROR")
+    for k in 1:size(data.train,1)
+      x_in = data.train[k,1:size(data.train, 2)-1]
+      feed_forward!(nn, x_in, y_out)
+      y_predTr[k] = y_out[1]
+      
+    end
+    for k in 1:size(data.test,1)
+      x_in = data.test[k,1:size(data.test, 2)-1]
+      feed_forward!(nn, x_in, y_out)
+      y_predTe[k] = y_out[1]
+    end
+    y_train = data.train[:,size(data.train, 2)]
+    MSETrain[ℓ]= QuadraticError(y_predTr, y_train, size(data.train, 1))
+
+    y_test = data.test[:,size(data.test, 2)]
+    MSETest[ℓ]= QuadraticError(y_predTe, y_test, size(data.test, 1))
+     
+    println("Epoch: ",ℓ," MSETrain: ", MSETrain[ℓ], " MSETest: ",MSETest[ℓ])  
   end
+  #Plot real vs predicted
+  
+  figureRPTr = scatter(y_predTr, y_train)
+  figureRPTe = scatter(y_predTe, y_test)
+  display(figureRPTr)
+  readline()
+  display(figureRPTe)
+  readline()
+  #Plots
+  figureMSETR = scatter(MSETrain)
+  figureMSETE = scatter(MSETest)
+  display(figureMSETR)
+  readline()
+  display(figureMSETE)
+  readline()
+  gui()
 end
-
-data = DataSlicer("dataset/A1-turbine.txt", 0.85)
-layers = [size(data.train,2)-1; 9; 5; 1]
-nn = NeuralNet(layers)
-
-η = 0.1
-α = 0.5
-#println(size(data.train,2))
-#println(data.train[1, 1:size(data.train,2)-1])
-BP(nn, data, η, α)
