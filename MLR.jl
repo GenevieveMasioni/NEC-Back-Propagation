@@ -57,8 +57,8 @@ end
 # TODO : find optimal parameters (architecture, learning rate, momemtum, number of epochs)
 function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64)
   println("...crossValidation()")
-  η = 0.05
-  α = 0.1
+  η = 0.15
+  α = 0.45
   #dataset = copy(data)
   error_bp = 0
   error_mlr = 0
@@ -90,7 +90,7 @@ function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64)
     dataset = Dataset(data.names, data.features, data.patterns, data.boundary, Matrix(train), Matrix(test), train, test, rangesTrain, rangesTest)
     scale(train, rangesTrain)
     scale(test, rangesTest)
-    error_bp += BP(nn, dataset, η, α, "cv")
+    error_bp += BP(nn, dataset, η, α)
     error_mlr += MLR(dataset)
   end
   # compute global error

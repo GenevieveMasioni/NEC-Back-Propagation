@@ -24,19 +24,19 @@ function main(args)
         boundary = 0.80
     end
 
-    data = DataSlicer(string(filename), boundary)
+    data = DataSlicer(string("dataset/",filename), boundary)
     layers = [size(data.train,2)-1;9;5; 1]
     nn = NeuralNet(layers)
 
     
-    #=η = 0.15
-    α = 0.45
-    BP(nn, data, η, α, filename)=#
+    #η = 0.15
+    #α = 0.45
+    #BP(nn, data, η, α)
     
 
     #MLR(data)
-    #error = crossValidation(nn, data, 4)
-    #println("Prediction errors (bp, mlr) : ", error)
+    error = crossValidation(nn, data, 4)
+    println("Prediction errors (bp, mlr) : ", error)
 end
 
 main(ARGS)

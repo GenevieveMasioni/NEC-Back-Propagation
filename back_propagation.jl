@@ -123,7 +123,7 @@ function QuadraticError(y_pred::Vector{Float64}, y_true::Vector{Float64}, nrObse
   return MSE
 end
 
-function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, filename::String)
+function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
   println("...Back Propagation()")
   epoch = 50
   y_out = zeros(nn.n[nn.L])
@@ -184,10 +184,11 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, filename::St
   descale(data_train_df, data.rangesTrain)
   descale(data_test_df, data.rangesTest)
 
-  #saving the results on a cvs file
+  #=saving the results on a cvs file
   s = size(data_test_df,2)
-  path = split(filename,".",limit=2)
-  CSV.write(string("Results/BP/",path[1],"_results_test.csv"), data_test_df[:,s-1:s])
+  #f=data.filename
+  #path = split(f,".",limit=2)
+  CSV.write(string("Results/BP/_results_test.csv"), data_test_df[:,s-1:s])
 
   #Plotting Original Output vs Predicted Output
   figureRPTr = scatter(data_train_df[:,size(data_train_df,2)-1],data_train_df[:,size(data_train_df,2)],title = "Predicted Vs Original Train", ylabel="Prediction", xlabel="Original")
@@ -201,10 +202,10 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, filename::St
   display(figureMSETE)
 
   #save Plots
-  png(figureRPTr,string("Plots/BP/",path[1],"figure_Real_Predict_Train.jpg"))
-  png(figureRPTe,string("Plots/BP/",path[1],"figure_Real_Predict_Test.jpg"))
-  png(figureMSETR,string("Plots/BP/",path[1],"figure_Error_Train.jpg"))
-  png(figureMSETE,string("Plots/BP/",path[1],"figure_Error_Test.jpg"))
+  png(figureRPTr,string("Plots/BP/figure_Real_Predict_Train.jpg"))
+  png(figureRPTe,string("Plots/BP/figure_Real_Predict_Test.jpg"))
+  png(figureMSETR,string("Plots/BP/figure_Error_Train.jpg"))
+  png(figureMSETE,string("Plots/BP/figure_Error_Test.jpg"))=#
   
   return Base.sum(MSETest) / size(data.test, 1)
 end
