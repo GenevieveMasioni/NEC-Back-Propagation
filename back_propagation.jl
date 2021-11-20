@@ -125,7 +125,7 @@ end
 
 function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, filename::String)
   println("...Back Propagation()")
-  epoch = 10
+  epoch = 50
   y_out = zeros(nn.n[nn.L])
   y_predTr = zeros(size(data.train, 1))
   y_predTe = zeros(size(data.test, 1))
@@ -168,9 +168,9 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, filename::St
     y_test = data.test[:,size(data.test, 2)]
     MSETest[ℓ]= QuadraticError(y_predTe, y_test, size(data.test, 1))
   end
-  return Base.sum(MSETest) / size(data.test, 1)
+  
 
-  #= Display the % error over n epochs
+  #Display the % error over n epochs
   println("Relative absolute error over ", epoch, " Epochs")
   println("Nr. of Epoch: ",epoch)
   println("Relative absolute error Train: ", MSETrain[epoch])
@@ -187,21 +187,24 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, filename::St
   #saving the results on a cvs file
   s = size(data_test_df,2)
   path = split(filename,".",limit=2)
-  CSV.write(string("Results/",path[1],"_BP_results_test.csv"), data_test_df[:,s-1:s])
+  CSV.write(string("Results/BP/",path[1],"_results_test.csv"), data_test_df[:,s-1:s])
 
   #Plotting Original Output vs Predicted Output
   figureRPTr = scatter(data_train_df[:,size(data_train_df,2)-1],data_train_df[:,size(data_train_df,2)],title = "Predicted Vs Original Train", ylabel="Prediction", xlabel="Original")
   display(figureRPTr)
-  readline()
-  figureRPTr = scatter(data_test_df[:,size(data_test_df,2)-1],data_test_df[:,size(data_test_df,2)],title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
-  display(figureRPTr)
-  readline()
-  #Plots
+  figureRPTe = scatter(data_test_df[:,size(data_test_df,2)-1],data_test_df[:,size(data_test_df,2)],title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
+  display(figureRPTe)
+  #Plots Of the %Errors
   figureMSETR = plot(MSETrain, title = "Training % Error over Epochs", xlabel="Epoch", ylabel="%Error")
   figureMSETE = plot(MSETest, title = "Test % Error over Epochs", xlabel="Epoch", ylabel="%Error")
   display(figureMSETR)
-  readline()
   display(figureMSETE)
-  readline()
-  =#
+
+  #save Plots
+  png(figureRPTr,string("Plots/BP/",path[1],"figure_Real_Predict_Train.jpg"))
+  png(figureRPTe,string("Plots/BP/",path[1],"figure_Real_Predict_Test.jpg"))
+  png(figureMSETR,string("Plots/BP/",path[1],"figure_Error_Train.jpg"))
+  png(figureMSETE,string("Plots/BP/",path[1],"figure_Error_Test.jpg"))
+  
+  return Base.sum(MSETest) / size(data.test, 1)
 end
