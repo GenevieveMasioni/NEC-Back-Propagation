@@ -1,33 +1,42 @@
+include("utils.jl")
 include("back_propagation.jl")
 include("MLR.jl")
-include("utils.jl")
 
-println("...STARTING PROGRAM...")
-println("Type the file you wish to select:")
-filename = readline()
+function main(args)
+    @show args
+    if(size(args,1) < 1)
+      println("Error : the program expects 1 argument.")
+      println("Usage : julia run_bp.jl parameters_file_path")
+      return;
+    elseif (size(args,1) > 1)
+      println("Warning : too many arguments (1 expected). Only 1 will be considered.")
+    end
 
-boundary = 0
+    filename = args[1]
 
-if filename == "A1-turbine.txt"
-    boundary = 0.85
-elseif filename == "A1-synthetic.txt"
-    boundary = 0.80
-else
-    boundary = 0.80
+    # TODO : load args from parameters_file.txt
+    boundary = 0
+    if occursin("A1-turbine.txt",filename)
+        boundary = 0.85
+    elseif occursin("A1-synthetic.txt",filename)
+        boundary = 0.80
+    else
+        boundary = 0.80
+    end
+
+    data = DataSlicer(string(filename), boundary)
+    layers = [size(data.train,2)-1;5;5; 1]
+    nn = NeuralNet(layers)
+
+    #=
+    η = 0.02
+    α = 0.2
+    BP(nn, data, η, α, filename)
+    =#
+
+    #MLR(data)
+    error = crossValidation(nn, data, 4)
+    println("Prediction errors (bp, mlr) : ", error)
 end
 
-data = DataSlicer(string("dataset/",filename), boundary)
-layers = [size(data.train,2)-1;5;5; 1]
-nn = NeuralNet(layers)
-
-<<<<<<< HEAD
-#BP(nn, data, η, α)
-=======
-η = 0.02
-α = 0.2
-BP(nn, data, η, α, filename)
->>>>>>> 6587ac7e8672743f24309fae78cb3ad93dc056ee
-
-#MLR(data)
-error = crossValidation(nn, data, 4)
-println("Prediction errors (bp, mlr) : ", error)
+main(ARGS)

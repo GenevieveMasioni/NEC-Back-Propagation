@@ -90,7 +90,7 @@ function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64)
     dataset = Dataset(data.names, data.features, data.patterns, data.boundary, Matrix(train), Matrix(test), train, test, rangesTrain, rangesTest)
     scale(train, rangesTrain)
     scale(test, rangesTest)
-    error_bp += BP(nn, dataset, η, α)
+    error_bp += BP(nn, dataset, η, α, "cv")
     error_mlr += MLR(dataset)
   end
   # compute global error
