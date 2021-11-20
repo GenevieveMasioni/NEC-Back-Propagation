@@ -123,7 +123,8 @@ function QuadraticError(y_pred::Vector{Float64}, y_true::Vector{Float64}, nrObse
   return MSE
 end
 
-function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) 
+function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, filename::String) 
+  println("...Back Propagation()")
   epoch = 10
   y_out = zeros(nn.n[nn.L])
   y_predTr = zeros(size(data.train, 1))
@@ -133,7 +134,8 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
   y_train= zeros(size(data.train, 1))
   MSETrain = zeros(epoch)
   MSETest = zeros(epoch)
- for ℓ in 1:epoch
+  #BP Training
+  for ℓ in 1:epoch
     for i in 1:batch:size(data.train, 1)
       for j in 1:batch
         if i+batch>size(data.train, 1)
@@ -143,21 +145,17 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
           rndNum = rand(i:batch+i-1)
           x_in = data.train[rndNum,1:size(data.train,2)-1]
         end
-      #rndNum = rand(1:size(data.train, 1))
-      #x_in=data.train[rndNum,1:size(data.train,2)-1]
         z = data.train[rndNum,size(data.train,2)]
         feed_forward!(nn, x_in, y_out)  
         BPError(nn, y_out, z)  
       end
       UpdateThresholdWeights(nn,η, α, batch)
     end
-    #Quadratic Errors
-    println("Quadratic ERROR")
+    #Relative absolute error
     for k in 1:size(data.train,1)
       x_in = data.train[k,1:size(data.train, 2)-1]
       feed_forward!(nn, x_in, y_out)
       y_predTr[k] = y_out[1]
-      
     end
     for k in 1:size(data.test,1)
       x_in = data.test[k,1:size(data.test, 2)-1]
@@ -168,22 +166,32 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
     MSETrain[ℓ]= QuadraticError(y_predTr, y_train, size(data.train, 1))
 
     y_test = data.test[:,size(data.test, 2)]
-    MSETest[ℓ]= QuadraticError(y_predTe, y_test, size(data.test, 1))
-     
-    println("Epoch: ",ℓ," MSETrain: ", MSETrain[ℓ], " MSETest: ",MSETest[ℓ])  
+    MSETest[ℓ]= QuadraticError(y_predTe, y_test, size(data.test, 1))  
   end
+  #Display the % error over n epochs
+  println("Relative absolute error over ", epoch, " Epochs")
+  println("Nr. of Epoch: ",epoch)
+  println("Relative absolute error Train: ", MSETrain[epoch])
+  println("Relative absolute error Test: ",MSETest[epoch])
   #Add column predicted to dataframe, for later scaling
-  insertcols!(data.train_df, size(data.train,2)+1, :predictedY => y_predTr[:])
-  insertcols!(data.test_df, size(data.test,2)+1, :predictedY => y_predTe[:])
+  data_train_df=data.train_df
+  data_test_df=data.test_df
+  insertcols!(data_train_df, size(data.train,2)+1, :predictedY => y_predTr[:])
+  insertcols!(data_test_df, size(data.test,2)+1, :predictedY => y_predTe[:])
   #Scaling to original size
-  descale(data.train_df, data.rangesTrain)
-  descale(data.test_df, data.rangesTest)
+  descale(data_train_df, data.rangesTrain)
+  descale(data_test_df, data.rangesTest)
+
+  #saving the results on a cvs file
+  s = size(data_test_df,2)
+  path = split(filename,".",limit=2)
+  CSV.write(string("Results/",path[1],"_BP_results_test.csv"), data_test_df[:,s-1:s])
 
   #Plotting Original Output vs Predicted Output
-  figureRPTr = scatter(data.train_df[:,size(data.train_df,2)-1],data.train_df[:,size(data.train_df,2)],title = "Predicted Vs Original Train", ylabel="Prediction", xlabel="Original")
+  figureRPTr = scatter(data_train_df[:,size(data_train_df,2)-1],data_train_df[:,size(data_train_df,2)],title = "Predicted Vs Original Train", ylabel="Prediction", xlabel="Original")
   display(figureRPTr)
   readline()
-  figureRPTr = scatter(data.test_df[:,size(data.test_df,2)-1],data.test_df[:,size(data.test_df,2)],title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
+  figureRPTr = scatter(data_test_df[:,size(data_test_df,2)-1],data_test_df[:,size(data_test_df,2)],title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
   display(figureRPTr)
   readline()
   #Plots
