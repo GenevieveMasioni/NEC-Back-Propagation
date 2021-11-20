@@ -172,20 +172,25 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
      
     println("Epoch: ",ℓ," MSETrain: ", MSETrain[ℓ], " MSETest: ",MSETest[ℓ])  
   end
-  #Plot real vs predicted
-  
-  figureRPTr = scatter(y_predTr, y_train)
-  figureRPTe = scatter(y_predTe, y_test)
+  #Add column predicted to dataframe, for later scaling
+  insertcols!(data.train_df, size(data.train,2)+1, :predictedY => y_predTr[:])
+  insertcols!(data.test_df, size(data.test,2)+1, :predictedY => y_predTe[:])
+  #Scaling to original size
+  descale(data.train_df, data.rangesTrain)
+  descale(data.test_df, data.rangesTest)
+
+  #Plotting Original Output vs Predicted Output
+  figureRPTr = scatter(data.train_df[:,size(data.train_df,2)-1],data.train_df[:,size(data.train_df,2)],title = "Predicted Vs Original Train", ylabel="Prediction", xlabel="Original")
   display(figureRPTr)
   readline()
-  display(figureRPTe)
+  figureRPTr = scatter(data.test_df[:,size(data.test_df,2)-1],data.test_df[:,size(data.test_df,2)],title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
+  display(figureRPTr)
   readline()
   #Plots
-  figureMSETR = scatter(MSETrain)
-  figureMSETE = scatter(MSETest)
+  figureMSETR = plot(MSETrain, title = "Training % Error over Epochs", xlabel="Epoch", ylabel="%Error")
+  figureMSETE = plot(MSETest, title = "Test % Error over Epochs", xlabel="Epoch", ylabel="%Error")
   display(figureMSETR)
   readline()
   display(figureMSETE)
   readline()
-  gui()
 end
