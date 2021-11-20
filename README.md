@@ -10,10 +10,10 @@ Prediction using the following algorithms:
 
 ## Tasks list
 Functions :
-- [ ] Data preprocessing (third dataset)
+- [x] Data preprocessing (third dataset)
 - [x] Data normalization (all datasets)
-- [ ] Cross-validation (MLR and BP)
-- [ ] BP
+- [x] Cross-validation (MLR and BP)
+- [x] BP
 - [x] MLR (use of an existing Julia lib)
 - [ ] Compute performance (automatisation of test process to find the best parameters for relative absolute error minimization)
 - [x] Data slicer (training-validation and test)
