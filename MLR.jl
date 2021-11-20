@@ -53,7 +53,8 @@ function MLR(data::Dataset)
   return mean(abs.(performance_test.error))
 end
 
-# repeat the training process n-folds times and find optimal parameters (architecture, learning rate, momemtum nnuomber of epochs)
+# repeat the training process n-folds times and
+# TODO : find optimal parameters (architecture, learning rate, momemtum, number of epochs)
 function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64)
   println("...crossValidation()")
   η = 0.05
@@ -92,7 +93,7 @@ function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64)
     error_bp += BP(nn, dataset, η, α)
     error_mlr += MLR(dataset)
   end
-  # computer global error
+  # compute global error
   return (error_bp/nbFolds, error_mlr/nbFolds)
 end
 

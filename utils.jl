@@ -11,8 +11,10 @@ Pkg.add("Lathe")
 #Pkg.add("MultivariateStats")
 Pkg.add("StatsModels")
 Pkg.add("StatsPlots")
+Pkg.add("ArgParse")
 =#
 # Load the installed packages
+using ArgParse
 using CSV
 using DataFrames
 using GLM
@@ -91,8 +93,13 @@ function descale(df::DataFrame, ranges::Vector{Tuple},s_min::Float64 = 0.0, s_ma
   for i in 1:rows
     for j in 1:cols
       s = df[i,j]
-      x_min = ranges[j][1]
-      x_max = ranges[j][2]
+      if j == cols
+        x_min = ranges[j-1][1]
+        x_max = ranges[j-1][2]
+      else
+        x_min = ranges[j][1]
+        x_max = ranges[j][2]
+      end
       x = x_min + ((x_max - x_min)/(s_max - s_min)) * (s - s_min)
       df[i,j] = x
     end
