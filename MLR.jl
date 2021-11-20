@@ -27,7 +27,7 @@ function MLR(data::Dataset)
   prediction_test = predict(linearRegressor, data.test_df)
   prediction_train = predict(linearRegressor, data.train_df)
 
-  # Training Performance DataFrame (compute squared error)
+  #= Training Performance DataFrame (compute squared error)
   performance_train = DataFrame(y_actual = data.train_df[!,response], y_predicted = prediction_train)
   performance_train.error = performance_train[!,:y_actual] - performance_train[!,:y_predicted]
   performance_train.error_sq = performance_train.error.*performance_train.error
@@ -35,6 +35,7 @@ function MLR(data::Dataset)
   # Training Error
   println("Mean Absolute train error: ", mean(abs.(performance_train.error)), "\n")
   println("Mean Absolute Percentage train error: ", mape(performance_train), "\n")
+  =#
 
   # Test Performance DataFrame (compute squared error)
   performance_test = DataFrame(y_actual = data.test_df[!,response], y_predicted = prediction_test)
@@ -49,7 +50,7 @@ function MLR(data::Dataset)
   histogram(performance_train.error, bins = 50, title = "Train Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
   histogram(performance_test.error, bins = 50, title = "Test Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
   =#
-  return mape(performance_test)
+  return mean(abs.(performance_test.error))
 end
 
 # repeat the training process n-folds times and find optimal parameters (architecture, learning rate, momemtum nnuomber of epochs)

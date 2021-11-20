@@ -12,5 +12,5 @@ nn = NeuralNet(layers)
 #BP(nn, data, η, α)
 
 #MLR(data)
-error = crossValidation(data, 4)
-println(error)
+error = crossValidation(nn, data, 4)
+println("Prediction errors (bp, mlr) : ", error)
