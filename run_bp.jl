@@ -9,6 +9,8 @@ nn = NeuralNet(layers)
 η = 0.05
 α = 0.1
 
-BP(nn, data, η, α)
+#BP(nn, data, η, α)
 
-#Multilinear_regression(data)
+#MLR(data)
+error = crossValidation(data, 4)
+println(error)

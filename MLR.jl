@@ -1,4 +1,5 @@
 include("utils.jl")
+include("back_propagation.jl")
 
 # Mean Absolute Percentage Error
 function mape(performance)
@@ -7,7 +8,7 @@ function mape(performance)
 end
 
 function MLR(data::Dataset)
-  println("...Multilinear_regression()")
+  println("...MLR()")
   # train a linear regression model with GLM (Generalized Linear Model) package
   response = data.names[size(data.names, 1)]
   predictors = data.names[1:size(data.names, 1)-1]
@@ -33,7 +34,7 @@ function MLR(data::Dataset)
 
   # Training Error
   println("Mean Absolute train error: ", mean(abs.(performance_train.error)), "\n")
-  println("Mean Aboslute Percentage train error: ", mape(performance_train), "\n")
+  println("Mean Absolute Percentage train error: ", mape(performance_train), "\n")
 
   # Test Performance DataFrame (compute squared error)
   performance_test = DataFrame(y_actual = data.test_df[!,response], y_predicted = prediction_test)
@@ -44,41 +45,56 @@ function MLR(data::Dataset)
   println("Mean Absolute test error: ", mean(abs.(performance_test.error)), "\n")
   println("Mean Absolute Percentage test error: ", mape(performance_test), "\n")
 
-  # Histogram of error to see if it's normally distributed on train and test datasets
+  #= Histogram of error to see if it's normally distributed on train and test datasets
   histogram(performance_train.error, bins = 50, title = "Train Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
   histogram(performance_test.error, bins = 50, title = "Test Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
+  =#
+  return mape(performance_test)
 end
 
 # repeat the training process n-folds times and find optimal parameters (architecture, learning rate, momemtum nnuomber of epochs)
-function crossValidation(data::Dataset, nbFolds::Int64)
+function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64)
   println("...crossValidation()")
-  errors = []
+  η = 0.05
+  α = 0.1
+  #dataset = copy(data)
+  error_bp = 0
+  error_mlr = 0
   folds = []
   foldSize = round(Int64, size(data.train_df, 1) / nbFolds)
-  println("Fold size : ", foldSize)
+  println("Fold : ", nbFolds, " - Fold size : ", foldSize, " - Patterns : ", data.patterns)
 
   for i in 1:nbFolds
     start = (i-1) * foldSize + 1
     max = i * foldSize
+    if(max > size(data.train_df,1))
+      max = size(data.train_df,1)
+    end
     println("start = ", start, " ; max = ", max)
-    fold = data.train_df[start:max, :]
+    fold = copy(data.train_df[start:max, :])
     push!(folds, fold)
   end
 
   for i in 1:nbFolds
     # train with folds-1 subsets and validate with the last one
-    S_i = folds[i]
-    S = copy(folds)
-    println(S)
-    deleteat!(S, i)
-    S = hcat(select.(S)...)
-    println(S)
+    test = folds[i]
+    train = deepcopy(folds)
+    deleteat!(train, i)
+    train = vcat(select.(train, :)...)
+
     # compute error x
+    rangesTrain = getRanges(train)
+    rangesTest = getRanges(test)
+    dataset = Dataset(data.names, data.features, data.patterns, data.boundary, Matrix(train), Matrix(test), train, test, rangesTrain, rangesTest)
+    scale(train, rangesTrain)
+    scale(test, rangesTest)
+    error_bp += BP(nn, dataset, η, α)
+    error_mlr += MLR(dataset)
   end
   # computer global error
-  prediction_error = Base.sum(errors)/size(errors,1)
-  return prediction_error
+  return (error_bp/nbFolds, error_mlr/nbFolds)
 end
+
 
 #=
 Another function : compute perf
@@ -94,8 +110,3 @@ function findBestParameters()
   # evaluation using test dataset => final error
 end
 =#
-
-data = DataSlicer("dataset/A1-turbine.txt", 0.85)
-#MLR(data)
-error = crossValidation(data, 4)
-println(error)

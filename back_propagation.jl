@@ -71,7 +71,7 @@ function BPError(nn::NeuralNet, y_out::Vector{Float64}, z::Float64)#data::Vector
     for j in 1:nn.n[ℓ-1]
       current_error = 0
       for i in 1:nn.n[ℓ]
-        current_error += nn.delta[ℓ][i]*nn.w[ℓ][i,j]   
+        current_error += nn.delta[ℓ][i]*nn.w[ℓ][i,j]
       end
       nn.delta[ℓ-1][j] = sigmoid(nn.h[ℓ-1][j]) * current_error
     end
@@ -91,7 +91,7 @@ function UpdateThresholdWeights(nn::NeuralNet, η::Float64, α::Float64, p::Int6
             end
           else
             break
-          end  
+          end
         end
         nn.d_w[ℓ][i,j] = -η*sumw + α*nn.d_w[ℓ][i,j]
         nn.w[ℓ][i,j] = nn.w[ℓ][i,j]+nn.d_w[ℓ][i,j]
@@ -123,7 +123,7 @@ function QuadraticError(y_pred::Vector{Float64}, y_true::Vector{Float64}, nrObse
   return MSE
 end
 
-function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64) 
+function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
   epoch = 10
   y_out = zeros(nn.n[nn.L])
   y_predTr = zeros(size(data.train, 1))
@@ -146,8 +146,8 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
       #rndNum = rand(1:size(data.train, 1))
       #x_in=data.train[rndNum,1:size(data.train,2)-1]
         z = data.train[rndNum,size(data.train,2)]
-        feed_forward!(nn, x_in, y_out)  
-        BPError(nn, y_out, z)  
+        feed_forward!(nn, x_in, y_out)
+        BPError(nn, y_out, z)
       end
       UpdateThresholdWeights(nn,η, α, batch)
     end
@@ -157,7 +157,7 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
       x_in = data.train[k,1:size(data.train, 2)-1]
       feed_forward!(nn, x_in, y_out)
       y_predTr[k] = y_out[1]
-      
+
     end
     for k in 1:size(data.test,1)
       x_in = data.test[k,1:size(data.test, 2)-1]
@@ -169,11 +169,12 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
 
     y_test = data.test[:,size(data.test, 2)]
     MSETest[ℓ]= QuadraticError(y_predTe, y_test, size(data.test, 1))
-     
-    println("Epoch: ",ℓ," MSETrain: ", MSETrain[ℓ], " MSETest: ",MSETest[ℓ])  
+
+    println("Epoch: ",ℓ," MSETrain: ", MSETrain[ℓ], " MSETest: ",MSETest[ℓ])
   end
-  #Plot real vs predicted
-  
+  return Base.sum(MSETest) / size(data.test, 1)
+  #= Plot real vs predicted
+
   figureRPTr = scatter(y_predTr, y_train)
   figureRPTe = scatter(y_predTe, y_test)
   display(figureRPTr)
@@ -188,4 +189,5 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
   display(figureMSETE)
   readline()
   gui()
+  =#
 end

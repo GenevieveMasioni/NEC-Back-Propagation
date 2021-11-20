@@ -12,7 +12,6 @@ Pkg.add("Lathe")
 Pkg.add("StatsModels")
 Pkg.add("StatsPlots")
 =#
-
 # Load the installed packages
 using CSV
 using DataFrames
@@ -23,6 +22,7 @@ using Lathe.preprocess: TrainTestSplit
 #using MultivariateStats
 using StatsModels
 using Statistics
+import Base.copy
 
 struct NeuralNet
   L::Int64                        # number of layers
@@ -106,7 +106,7 @@ function DataSlicer(path::String, boundary::Float64 = 0.8)
   rows = size(df, 1)
   cols = size(df, 2)
   names = propertynames(df)
-  
+
   train, test = TrainTestSplit(df, boundary)
   rangesTest = getRanges(test)
   rangesTrain = getRanges(train)
@@ -114,9 +114,12 @@ function DataSlicer(path::String, boundary::Float64 = 0.8)
   #dataset = Dataset(names, cols, rows, boundary, Matrix(train), Matrix(test), train, test, rangesTrain, rangesTest)
   scale(train, rangesTrain)
   scale(test, rangesTest)
-  
+
   println("Features : ", cols, " | Patterns : ", rows, " | Boundary : ", boundary, " | Training : ", size(train, 1), " | Test : ", size(test, 1))
 
   return Dataset(names, cols, rows, boundary, Matrix(train), Matrix(test), train, test, rangesTrain, rangesTest)
 end
 
+function Base.copy(data::Dataset)
+  return Dataset(data.names, data.features, data.patterns, data.boundary, copy(data.train), copy(data.test), copy(data.train_df), copy(data.test_df), copy(data.rangesTrain), copy(data.rangesTest))
+end
