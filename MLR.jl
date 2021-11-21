@@ -9,36 +9,15 @@ end
 
 function MLR(data::Dataset)
   println("...MLR()")
-  # train a linear regression model with GLM (Generalized Linear Model) package
   response = data.names[size(data.names, 1)]
   predictors = data.names[1:size(data.names, 1)-1]
-  #println(response)
-  #println(predictors)
   fm = Term(response) ~ sum(term.(predictors))
   linearRegressor = lm(fm, data.train_df)
   println(linearRegressor)
 
-  # R Square value of the model
-  println("R-Square : ", r2(linearRegressor), "\n")
-
-  # Model Prediction and Performance : Mean Absolute Percentage Error
-
   # Prediction
   prediction_test = predict(linearRegressor, data.test_df)
   prediction_train = predict(linearRegressor, data.train_df)
-
-  #figureRPTe = scatter(data.test_df[:,size(data.test_df,2)],prediction_test,title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
-  #display(figureRPTe)
-  #png(figureRPTe,string("Plots/MLR/song_Real_Predict_Test.jpg"))
-  #= Training Performance DataFrame (compute squared error)
-  performance_train = DataFrame(y_actual = data.train_df[!,response], y_predicted = prediction_train)
-  performance_train.error = performance_train[!,:y_actual] - performance_train[!,:y_predicted]
-  performance_train.error_sq = performance_train.error.*performance_train.error
-
-  # Training Error
-  println("Mean Absolute train error: ", mean(abs.(performance_train.error)), "\n")
-  println("Mean Absolute Percentage train error: ", mape(performance_train), "\n")
-  =#
 
   # Test Performance DataFrame (compute squared error)
   performance_test = DataFrame(y_actual = data.test_df[!,response], y_predicted = prediction_test)
@@ -48,13 +27,8 @@ function MLR(data::Dataset)
 
   # Test Error
   println("Mean Absolute test error: ", mean(abs.(performance_test.error)), "\n")
-  println("Mean Absolute Percentage test error: ", mape(performance_test), "\n")
 
-  #= Histogram of error to see if it's normally distributed on train and test datasets
-  histogram(performance_train.error, bins = 50, title = "Train Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
-  histogram(performance_test.error, bins = 50, title = "Test Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
-  =#
-
+  # save results
   descale(performance_test_csv, data.rangesTest)
   s = size(performance_test_csv,2)
   CSV.write(string("./Results/MLR/_results_test.csv"), performance_test_csv[:,s-1:s])
@@ -62,8 +36,6 @@ function MLR(data::Dataset)
   return mean(abs.(performance_test.error))
 end
 
-# repeat the training process n-folds times and
-# TODO : find optimal parameters (architecture, learning rate, momemtum, number of epochs)
 function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64, η::Float64, α::Float64, epochs::Int64)
   println("...crossValidation()")
   #dataset = copy(data)
@@ -91,7 +63,6 @@ function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64, η::Float
     deleteat!(train, i)
     train = vcat(select.(train, :)...)
 
-    # compute error x
     rangesTrain = getRanges(train)
     rangesTest = getRanges(test)
     dataset = Dataset(data.names, data.features, data.patterns, data.boundary, Matrix(train), Matrix(test), train, test, rangesTrain, rangesTest)

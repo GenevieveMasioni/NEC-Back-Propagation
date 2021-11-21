@@ -86,8 +86,6 @@ function getRanges(df::DataFrame)
 end
 
 function scale(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.0, s_max::Float64 = 1.0)
-  # outliers’ detection, treatment of missing data,
-  # transformation of categorical data into an appropriate numeric representation, etc
   rows = size(df, 1)
   cols = size(df, 2)
 
@@ -105,8 +103,6 @@ function scale(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.0, s_max
 end
 
 function descale(df::DataFrame, ranges::Vector{Tuple},s_min::Float64 = 0.0, s_max::Float64 = 1.0)
-  # outliers’ detection, treatment of missing data,
-  # transformation of categorical data into an appropriate numeric representation, etc
   rows = size(df, 1)
   cols = size(df, 2)
 

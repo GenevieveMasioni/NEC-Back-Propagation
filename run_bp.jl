@@ -22,15 +22,12 @@ function main(args)
     α = 0.45
 
     open(path) do file
-      # line_number
       line = 0
 
-      # read till end of file
       while !eof(file)
         # read a new / next line for every iteration
         s = readline(file)
         line += 1
-        println("$line . $s")
         if line == 1
           data_path = s
         elseif line == 2
