@@ -27,9 +27,9 @@ function MLR(data::Dataset)
   prediction_test = predict(linearRegressor, data.test_df)
   prediction_train = predict(linearRegressor, data.train_df)
 
-  figureRPTe = scatter(data.test_df[:,size(data.test_df,2)],prediction_test,title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
-  display(figureRPTe)
-  png(figureRPTe,string("Plots/MLR/A1-synthetic_Real_Predict_Test.jpg"))
+  #figureRPTe = scatter(data.test_df[:,size(data.test_df,2)],prediction_test,title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
+  #display(figureRPTe)
+  #png(figureRPTe,string("Plots/MLR/song_Real_Predict_Test.jpg"))
   #= Training Performance DataFrame (compute squared error)
   performance_train = DataFrame(y_actual = data.train_df[!,response], y_predicted = prediction_train)
   performance_train.error = performance_train[!,:y_actual] - performance_train[!,:y_predicted]
