@@ -51,6 +51,29 @@ struct Dataset
     rangesTest::Vector{Tuple}
 end
 
+function preprocessFile(df::DataFrame)
+  
+  df1 = dropmissing!(deepcopy(df))
+  dropmissing!(copy(df1))
+  rows = size(df1, 1)
+  cols = size(df1, 2)
+  for i in 1:rows
+    for j in 1:cols
+      #replace!(df1[:,j], missing=>0)
+      if (typeof(df1[i,j])==Int64||typeof(df1[i,j])==Float64)
+        convert(Float64, df1[i,j])
+      else
+        a = df1[i,j]
+        a = replace(a, ","=>".", count = 1)
+        parse(Float64, a)
+        df1[i,j] = a
+      end
+      
+    end
+  end
+  return df1
+end
+
 # for columns of a DataFrame
 function getRanges(df::DataFrame)
   ranges = Vector{Tuple}()
@@ -68,7 +91,7 @@ function scale(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.0, s_max
   # transformation of categorical data into an appropriate numeric representation, etc
   rows = size(df, 1)
   cols = size(df, 2)
-
+  
   #ranges = getRanges(df)
 
   for i in 1:rows
@@ -77,7 +100,7 @@ function scale(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.0, s_max
       x_min = ranges[j][1]
       x_max = ranges[j][2]
       s = s_min + ((s_max - s_min)/(x_max - x_min)) * (x - x_min)
-      df[i,j] = s
+      df[i,j] = s 
     end
   end
 end
@@ -107,12 +130,19 @@ function descale(df::DataFrame, ranges::Vector{Tuple},s_min::Float64 = 0.0, s_ma
 end
 
 # slicer : [0,1] with 1 = 100%, default 80 %
-function DataSlicer(path::String, boundary::Float64 = 0.8)
+function DataSlicer(path::String, boundary::Float64 = 0.8, preprocess::Bool=false)
   println("...DataSlicer()")
   df = DataFrame(CSV.File(path))
   rows = size(df, 1)
   cols = size(df, 2)
   names = propertynames(df)
+
+  if preprocess 
+    df=preprocessFile(df)
+    rows = size(df, 1)
+    cols = size(df, 2)
+    names = propertynames(df)
+  end
 
   train, test = TrainTestSplit(df, boundary)
   rangesTest = getRanges(test)

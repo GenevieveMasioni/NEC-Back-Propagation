@@ -16,15 +16,17 @@ function main(args)
 
     # TODO : load args from parameters_file.txt
     boundary = 0
+    preprocess = false
     if occursin("A1-turbine.txt",filename)
         boundary = 0.85
     elseif occursin("A1-synthetic.txt",filename)
         boundary = 0.80
     else
         boundary = 0.80
+        preprocess = true
     end
 
-    data = DataSlicer(string("dataset/",filename), boundary)
+    data = DataSlicer(string("dataset/",filename), boundary, preprocess)
     layers = [size(data.train,2)-1;9;5; 1]
     nn = NeuralNet(layers)
 

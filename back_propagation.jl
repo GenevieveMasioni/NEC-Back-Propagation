@@ -176,8 +176,8 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
   println("Relative absolute error Train: ", MSETrain[epoch])
   println("Relative absolute error Test: ",MSETest[epoch])
   # Add column predicted to dataframe, for later scaling
-  data_train_df=data.train_df
-  data_test_df=data.test_df
+  data_train_df=deepcopy(data.train_df)
+  data_test_df=deepcopy(data.test_df)
   insertcols!(data_train_df, size(data.train,2)+1, :predictedY => y_predTr[:])
   insertcols!(data_test_df, size(data.test,2)+1, :predictedY => y_predTe[:])
   #Scaling to original size
@@ -186,8 +186,6 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
 
   #=saving the results on a cvs file
   s = size(data_test_df,2)
-  #f=data.filename
-  #path = split(f,".",limit=2)
   CSV.write(string("Results/BP/_results_test.csv"), data_test_df[:,s-1:s])
 
   #Plotting Original Output vs Predicted Output
@@ -205,7 +203,7 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
   png(figureRPTr,string("Plots/BP/figure_Real_Predict_Train.jpg"))
   png(figureRPTe,string("Plots/BP/figure_Real_Predict_Test.jpg"))
   png(figureMSETR,string("Plots/BP/figure_Error_Train.jpg"))
-  png(figureMSETE,string("Plots/BP/figure_Error_Test.jpg"))=#
-  
+  png(figureMSETE,string("Plots/BP/figure_Error_Test.jpg"))
+  readline()=#
   return Base.sum(MSETest) / size(data.test, 1)
 end

@@ -96,19 +96,3 @@ function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64)
   # compute global error
   return (error_bp/nbFolds, error_mlr/nbFolds)
 end
-
-
-#=
-Another function : compute perf
-once best params found, train complete dataset with those params
-and test with test dataset / Use final NN to predict over test dataset
-Evaluate test error
-
-function findBestParameters()
-  # inputs : user inputs (epochs, folds, etc.)
-  crossValidation() # run x times and store prediction errors and value of params
-  # select params with lowest prediction error
-  # training with complete training dataset
-  # evaluation using test dataset => final error
-end
-=#
