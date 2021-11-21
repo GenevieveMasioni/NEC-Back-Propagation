@@ -54,17 +54,15 @@ function MLR(data::Dataset)
 
   descale(performance_test_csv, data.rangesTest)
   s = size(performance_test_csv,2)
-  CSV.write(string("./Results/MLR/songs_results_test.csv"), performance_test_csv[:,s-1:s])
+  CSV.write(string("./Results/MLR/_results_test.csv"), performance_test_csv[:,s-1:s])
 
   return mean(abs.(performance_test.error))
 end
 
 # repeat the training process n-folds times and
 # TODO : find optimal parameters (architecture, learning rate, momemtum, number of epochs)
-function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64)
+function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64, η::Float64, α::Float64)
   println("...crossValidation()")
-  η = 0.15
-  α = 0.45
   #dataset = copy(data)
   error_bp = 0
   error_mlr = 0

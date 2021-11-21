@@ -52,7 +52,6 @@ struct Dataset
 end
 
 function preprocessFile(df::DataFrame)
-  
   df1 = dropmissing!(deepcopy(df))
   dropmissing!(copy(df1))
   rows = size(df1, 1)
@@ -68,7 +67,7 @@ function preprocessFile(df::DataFrame)
         parse(Float64, a)
         df1[i,j] = a
       end
-      
+
     end
   end
   return df1
@@ -91,7 +90,7 @@ function scale(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.0, s_max
   # transformation of categorical data into an appropriate numeric representation, etc
   rows = size(df, 1)
   cols = size(df, 2)
-  
+
   #ranges = getRanges(df)
 
   for i in 1:rows
@@ -100,7 +99,7 @@ function scale(df::DataFrame, ranges::Vector{Tuple}, s_min::Float64 = 0.0, s_max
       x_min = ranges[j][1]
       x_max = ranges[j][2]
       s = s_min + ((s_max - s_min)/(x_max - x_min)) * (x - x_min)
-      df[i,j] = s 
+      df[i,j] = s
     end
   end
 end
@@ -137,7 +136,7 @@ function DataSlicer(path::String, boundary::Float64 = 0.8, preprocess::Bool=fals
   cols = size(df, 2)
   names = propertynames(df)
 
-  if preprocess 
+  if preprocess
     df=preprocessFile(df)
     rows = size(df, 1)
     cols = size(df, 2)
