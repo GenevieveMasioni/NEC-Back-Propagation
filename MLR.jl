@@ -39,6 +39,7 @@ function MLR(data::Dataset)
 
   # Test Performance DataFrame (compute squared error)
   performance_test = DataFrame(y_actual = data.test_df[!,response], y_predicted = prediction_test)
+  performance_test_csv = deepcopy(performance_test)
   performance_test.error = performance_test[!,:y_actual] - performance_test[!,:y_predicted]
   performance_test.error_sq = performance_test.error.*performance_test.error
 
@@ -50,6 +51,11 @@ function MLR(data::Dataset)
   histogram(performance_train.error, bins = 50, title = "Train Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
   histogram(performance_test.error, bins = 50, title = "Test Error Analysis", ylabel = "Frequency", xlabel = "Error",legend = false)
   =#
+
+  descale(performance_test_csv, data.rangesTest)
+  s = size(performance_test_csv,2)
+  CSV.write(string("./Results/MLR/songs_results_test.csv"), performance_test_csv[:,s-1:s])
+
   return mean(abs.(performance_test.error))
 end
 
