@@ -51,6 +51,11 @@ function main(args)
       end
     end
 
+    preprocess = false
+    if !occursin("A1-turbine.txt",data_path) && !occursin("A1-synthetic.txt",data_path)
+      preprocess = true
+    end
+
     data = DataSlicer(string(data_path), boundary, preprocess)
     pushfirst!(layers, size(data.train,2)-1)
     nn = NeuralNet(layers)

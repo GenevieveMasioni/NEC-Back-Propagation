@@ -123,9 +123,8 @@ function QuadraticError(y_pred::Vector{Float64}, y_true::Vector{Float64}, nrObse
   return MSE
 end
 
-function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
+function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, epoch::Int64)
   println("...Back Propagation()")
-  epoch = 50
   y_out = zeros(nn.n[nn.L])
   y_predTr = zeros(size(data.train, 1))
   y_predTe = zeros(size(data.test, 1))
@@ -168,7 +167,7 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64)
     y_test = data.test[:,size(data.test, 2)]
     MSETest[ℓ]= QuadraticError(y_predTe, y_test, size(data.test, 1))
   end
-  
+
 
   #Display the % error over n epochs
   println("Relative absolute error over ", epoch, " Epochs")
