@@ -1,5 +1,3 @@
-
-
 include("utils.jl")
 include("back_propagation.jl")
 include("MLR.jl")
