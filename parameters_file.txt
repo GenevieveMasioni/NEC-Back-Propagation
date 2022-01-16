@@ -1,5 +1,5 @@
-./dataset/A1-turbine.txt
-0.85 0.15
+./dataset/song_data_edited.csv
+0.80 0.20
 4
 9 5 1
 500

@@ -167,7 +167,7 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, epoch::Int64
   #Scaling to original size
   descale(data_train_df, data.rangesTrain)
   descale(data_test_df, data.rangesTest)
-
+  
   #saving the results on a cvs file
   s = size(data_test_df,2)
   CSV.write(string("Results/BP/_results_test.csv"), data_test_df[:,s-1:s])
@@ -175,7 +175,7 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, epoch::Int64
   #Plotting Original Output vs Predicted Output
   figureRPTr = scatter(data_train_df[:,size(data_train_df,2)-1],data_train_df[:,size(data_train_df,2)],title = "Predicted Vs Original Train", ylabel="Prediction", xlabel="Original")
   display(figureRPTr)
-  figureRPTe = scatter(data_test_df[:,size(data_test_df,2)-1],data_test_df[:,size(data_test_df,2)],title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
+  figureRPTe = scatter(data_test_df[:,s-1],data_test_df[:,s],title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
   display(figureRPTe)
   #Plots Of the %Errors
   figureMSETR = plot(MSETrain, title = "Training % Error over Epochs", xlabel="Epoch", ylabel="%Error")
@@ -188,6 +188,6 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, epoch::Int64
   png(figureRPTe,string("Plots/BP/figure_Real_Predict_Test.jpg"))
   png(figureMSETR,string("Plots/BP/figure_Error_Train.jpg"))
   png(figureMSETE,string("Plots/BP/figure_Error_Test.jpg"))
-  readline()
+  #readline()
   return Base.sum(MSETest) / size(data.test, 1)
 end

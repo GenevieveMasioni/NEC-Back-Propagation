@@ -21,7 +21,7 @@ function MLR(data::Dataset)
 
   # Test Performance DataFrame (compute squared error)
   performance_test = DataFrame(y_actual = data.test_df[!,response], y_predicted = prediction_test)
-  performance_test_csv = deepcopy(performance_test)
+  
   performance_test.error = performance_test[!,:y_actual] - performance_test[!,:y_predicted]
   performance_test.error_sq = performance_test.error.*performance_test.error
 
@@ -29,9 +29,17 @@ function MLR(data::Dataset)
   println("Mean Absolute test error: ", mean(abs.(performance_test.error)), "\n")
 
   # save results
+  performance_test_csv = deepcopy(data.test_df)
+  insertcols!(performance_test_csv, size(data.test_df,2)+1, :y_predicted => prediction_test[:])
   descale(performance_test_csv, data.rangesTest)
   s = size(performance_test_csv,2)
   CSV.write(string("./Results/MLR/_results_test.csv"), performance_test_csv[:,s-1:s])
+
+  #Plots
+  figureRPTe = scatter(performance_test_csv[:,s-1],performance_test_csv[:,s],title = "Predicted Vs Original Test", ylabel="Prediction", xlabel="Original")
+  display(figureRPTe)
+  #save Plots
+  png(figureRPTe,string("Plots/MLR/figure_Real_Predict_Test.jpg"))
 
   return mean(abs.(performance_test.error))
 end

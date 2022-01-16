@@ -18,8 +18,8 @@ function main(args)
     folds = 4
     layers = Vector{Int64}()
     epochs = 0
-    η = 0.15
-    α = 0.45
+    η = 0.1
+    α = 0.9
 
     open(path) do file
       line = 0
@@ -57,8 +57,11 @@ function main(args)
     pushfirst!(layers, size(data.train,2)-1)
     nn = NeuralNet(layers)
 
-    error = crossValidation(nn, data, folds, η, α, epochs)
-    println("Prediction errors (bp, mlr) : ", error)
+    #error = crossValidation(nn, data, folds, η, α, epochs)
+    #println("Prediction errors (bp, mlr) : ", error)
+    MLR(data)
+    #BP(nn, data, η, α, epochs)
+
 end
 
 main(ARGS)
