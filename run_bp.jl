@@ -57,9 +57,9 @@ function main(args)
     pushfirst!(layers, size(data.train,2)-1)
     nn = NeuralNet(layers)
 
-    #error = crossValidation(nn, data, folds, η, α, epochs)
-    #println("Prediction errors (bp, mlr) : ", error)
-    MLR(data)
+    error = crossValidation(nn, data, folds, η, α, epochs)
+    println("Prediction errors (bp, mlr) : ", error)
+    #MLR(data)
     #BP(nn, data, η, α, epochs)
 
 end

@@ -26,7 +26,7 @@ function MLR(data::Dataset)
   performance_test.error_sq = performance_test.error.*performance_test.error
 
   # Test Error
-  println("Mean Absolute test error: ", mean(abs.(performance_test.error)), "\n")
+  println("Mean Absolute test percentage error: ", mean(abs.(performance_test.error))*100, "%\n")
 
   # save results
   performance_test_csv = deepcopy(data.test_df)
@@ -41,7 +41,7 @@ function MLR(data::Dataset)
   #save Plots
   png(figureRPTe,string("Plots/MLR/figure_Real_Predict_Test.jpg"))
 
-  return mean(abs.(performance_test.error))
+  return mean(abs.(performance_test.error))*100
 end
 
 function crossValidation(nn::NeuralNet, data::Dataset, nbFolds::Int64, η::Float64, α::Float64, epochs::Int64)

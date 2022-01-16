@@ -189,5 +189,5 @@ function BP(nn::NeuralNet, data::Dataset, η::Float64, α::Float64, epoch::Int64
   png(figureMSETR,string("Plots/BP/figure_Error_Train.jpg"))
   png(figureMSETE,string("Plots/BP/figure_Error_Test.jpg"))
   #readline()
-  return Base.sum(MSETest) / size(data.test, 1)
+  return Base.sum(MSETest) / epoch 
 end
